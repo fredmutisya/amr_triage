@@ -14,6 +14,15 @@ import json
 from streamlit_lottie import st_lottie
 
 
+# Set page configuration
+st.set_page_config(
+    page_title="AST Prioritization Tool",
+    page_icon="🧬",
+    layout="wide",
+    initial_sidebar_state="expanded"  # Sidebar expanded by default
+)
+
+
 #Insert Animations
 
 # Load the Lottie animation
