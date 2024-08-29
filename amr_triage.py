@@ -46,12 +46,16 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+
+
 # Sidebar instructions
 st.sidebar.title("Instructions")
-st.sidebar.info("""
-Input the patient details into the AST triage tool to assess the urgency of antimicrobial resistance testing.
-""")
-st.lottie(lottie_animation, height=300)
+with st.sidebar:
+    st.lottie(lottie_animation, height=300)
+    st.sidebar.info("""
+    Input the patient details into the AST triage tool to assess the urgency of antimicrobial resistance testing.
+    """)
+    
 
 # New patient-related input fields as questions
 age = st.selectbox('What is the age of the patient?', ['0 to 2 Years','3 to 12 Years', '13 to 18 Years', '19 to 64 Years' ,'65 to 84 Years','85 and Over'])
