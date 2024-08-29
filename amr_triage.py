@@ -51,6 +51,9 @@ suspected_infection = st.text_input('What type of infection do you suspect the p
 source = st.selectbox('What type of sample is to be collected?', source_sample)
 antibiotic = st.selectbox('Which antibiotics were administered before specimen collection?', antibiotics)
 
+
+st.write(combined_data.columns.tolist())
+
 # Filter the combined dataset based on the selected criteria
 filtered_data = combined_data[
     (combined_data['Country'] == country) &
