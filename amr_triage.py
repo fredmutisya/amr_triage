@@ -2,6 +2,26 @@ import streamlit as st
 import pandas as pd
 import pickle
 from sklearn.preprocessing import LabelEncoder
+import numpy as np
+import os
+import joblib
+
+from streamlit_option_menu import option_menu
+from streamlit_extras.switch_page_button import switch_page
+
+#For animation
+import json
+from streamlit_lottie import st_lottie
+
+
+#Insert Animations
+
+def load_lottiefile(filepath: str):
+    with open(filepath, "r") as f:
+        return json.load(f)
+
+lottie_doc = load_lottiefile("doctor.json")
+
 
 # Load saved model
 model = pickle.load(open("decision_tree_model.pkl", 'rb'))
