@@ -62,7 +62,8 @@ st.sidebar.title("Instructions")
 with st.sidebar:
     st.lottie(lottie_animation, height=300)
     st.sidebar.info("""
-    Input the patient details into the AST triage tool to assess the urgency of antimicrobial resistance testing.
+    This is a AST triage tool developed by Dr. Oscar Nyangiri, Dr. Primrose Beryl and Dr. Fred Mutisya as part of the Vivli data challenge 2024
+    Please input the patient details into the AST triage tool to assess the urgency of antimicrobial resistance testing.
     """)
     
 
