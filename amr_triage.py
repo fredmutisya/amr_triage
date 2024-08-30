@@ -31,11 +31,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"  # Sidebar expanded by default
 )
 
-# Define the option menu with custom styling
 selected_tab = option_menu(
     menu_title=None,
-    options=["AST Triage Tool", "Performance of Decision Trees"],
-    icons=["🦠", "📊"],  # Microbe and bar chart icons
+    options=["AST Triage Tool", "Performance of Decision Trees", "About AST Triage Webapp"],  # Added "About AST Triage Webapp"
+    icons=["🦠", "📊", "ℹ️"],  # Added the information icon for the new tab
     orientation="horizontal",
     styles={
         "container": {"padding": "5px", "background-color": "#f0f0f0"},
@@ -419,3 +418,128 @@ elif selected_tab == "Performance of Decision Trees":
             st.plotly_chart(fig)
         else:
             st.write(f"No data available for the selected source: {selected_source}")
+
+
+
+
+
+
+
+
+
+
+elif selected_tab == "About AST Triage Webapp":
+    st.title("About AST Triage Webapp")
+    st.markdown("""
+    ### Welcome to the AST Triage Webapp!
+
+    This web application is designed to assist healthcare professionals in prioritizing antimicrobial susceptibility testing (AST) and analyzing the performance of decision trees on resistance data. Below you will find detailed information about the webapp, including its development, datasets used, and the theoretical foundation of decision trees.
+
+    #### Key Features:
+    - **AST Triage Tool**: Helps in assessing the urgency of AST based on patient details.
+    - **Performance of Decision Trees**: Provides tools to evaluate decision tree models on various datasets.
+
+    #### Developed By:
+    - Dr. Oscar Nyangiri
+    - Dr. Primrose Beryl
+    - Dr. Fred Mutisya
+
+    #### Data Sources:
+    - Pfizer Atlas Data
+    - Venatorx Gears Data
+
+    This tool was developed as part of the Vivli Data Challenge 2024.
+
+    **Disclaimer**: The tool is intended for informational purposes only and should not replace professional medical judgment.
+    """)
+
+    st.markdown("### Learn More About Each Section:")
+
+    with st.expander("1. AMR Data Challenge and Vivli"):
+        st.markdown("""
+        The Vivli AMR Data Challenge is an initiative that aims to tackle the global threat of antimicrobial resistance (AMR) by leveraging data sharing and collaboration. Vivli is an organization dedicated to enabling open data sharing and maximizing the reuse of clinical trial data. The AMR Data Challenge focuses on encouraging the use of shared data to develop innovative tools and solutions to combat AMR.
+        
+        This challenge invites researchers and data scientists to analyze data related to AMR and develop tools that can support healthcare decision-making, policy development, and research. The AST Triage Webapp was developed as part of this challenge, utilizing datasets provided by Pfizer and Venatorx.
+        """)
+
+    with st.expander("2. About the AMR Datasets - Pfizer (ATLAS) and Venatorx (GEARS)"):
+        st.markdown("""
+        The AMR datasets used in this webapp include:
+        
+        **Pfizer ATLAS**: The Antimicrobial Testing Leadership and Surveillance (ATLAS) database is a comprehensive global resource that tracks antimicrobial resistance trends. It includes data on various pathogens and their resistance patterns across different regions.
+        
+        **Venatorx GEARS**: The Global Essential Antimicrobial Resistance Surveillance (GEARS) dataset from Venatorx provides detailed information on resistance mechanisms, focusing on critical pathogens and the efficacy of antibiotics.
+        
+        These datasets are crucial for developing models and tools that help predict resistance patterns and support informed decision-making in clinical settings.
+        """)
+
+    with st.expander("3. The Antibiogram Structure and Filtering"):
+        st.markdown("""
+        The webapp generates customized antibiograms based on the patient's details and the selected criteria, such as country and sample source. The filtering mechanism includes:
+        
+        - **Country**: The data is first filtered by the selected country.
+        - **Bordering Countries**: If no data is found for the selected country, the app checks for neighboring countries that share borders and uses their data.
+        - **Region**: If data is still not available, the app broadens the search to include countries in the same region.
+        
+        The antibiogram provides a summary of the susceptibility of various species to different antibiotics, helping clinicians make informed decisions about treatment.
+        """)
+
+    with st.expander("4. Decision Tree Analysis and Theory"):
+        st.markdown("""
+        Decision trees are a popular machine learning method used for classification and regression tasks. In the context of antimicrobial susceptibility testing (AST), decision trees can help predict the likelihood of resistance based on patient data and historical patterns.
+        
+        **How Decision Trees Work**:
+        - **Nodes**: Represent the features in the dataset.
+        - **Branches**: Represent the decision rules.
+        - **Leaves**: Represent the outcomes (e.g., susceptible or resistant).
+        
+        The model learns by splitting the data at each node based on the feature that provides the highest information gain (or lowest Gini impurity). This process continues until the tree reaches its maximum depth or can no longer improve the classification.
+        
+        **Why Use Decision Trees for AST?**:
+        - **Interpretability**: Easy to understand and interpret the model's decisions.
+        - **Flexibility**: Can handle both numerical and categorical data.
+        - **No Need for Feature Scaling**: Decision trees do not require normalization or scaling of data.
+        """)
+
+    with st.expander("5. Performance of the Model for Policy Makers"):
+        st.markdown("""
+        Understanding the performance of decision trees in the context of AST is critical for policy makers. Here are some key metrics used to evaluate the model:
+        
+        - **Accuracy**: The ratio of correctly predicted instances to the total instances.
+          \[
+          \text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+          \]
+        
+        - **Sensitivity (Recall)**: The ability of the model to correctly identify true positives.
+          \[
+          \text{Sensitivity} = \frac{TP}{TP + FN}
+          \]
+        
+        - **Specificity**: The ability of the model to correctly identify true negatives.
+          \[
+          \text{Specificity} = \frac{TN}{TN + FP}
+          \]
+        
+        - **Precision (PPV)**: The proportion of true positives among the instances classified as positive.
+          \[
+          \text{Precision} = \frac{TP}{TP + FP}
+          \]
+        
+        - **Negative Predictive Value (NPV)**: The proportion of true negatives among the instances classified as negative.
+          \[
+          \text{NPV} = \frac{TN}{TN + FN}
+          \]
+        
+        - **Youden Index**: A summary measure of the effectiveness of a diagnostic test.
+          \[
+          \text{Youden Index} = \text{Sensitivity} + \text{Specificity} - 1
+          \]
+        
+        - **Predictive Summary Index (PSI)**: Combines precision and NPV to evaluate predictive performance.
+          \[
+          \text{PSI} = \text{Precision} + \text{NPV} - 1
+          \]
+        
+        These metrics help assess the reliability and robustness of the decision tree model in predicting antimicrobial resistance, supporting informed decision-making for health policies.
+        """)
+
