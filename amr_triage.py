@@ -165,7 +165,7 @@ with tab1:
                     resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].apply(lambda x: f"{x:.1f}%")
                 else:
                     st.write("No susceptible data available to calculate '% Susceptibility'.")
-                    return  # Exit early if the required data isn't available
+                    
     
                 # Filter for species with more than 30 total isolates
                 filtered_resistance_summary = resistance_summary[resistance_summary['Total Count'] > 30]
