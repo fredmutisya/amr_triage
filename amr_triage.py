@@ -72,7 +72,6 @@ tab1, tab2 = st.tabs(["AST Triage Tool", "Performance of Decision trees in AST"]
 
 
 
-
 with tab1:
     # AST Prioritization Tool Interface
     st.title('Antimicrobial Susceptibility Testing (AST) Triage Tool')
@@ -134,56 +133,22 @@ with tab1:
                 if not filtered_data.empty:
                     st.write(f"Data found using region countries: {region_countries}")
 
-    # Convert non-numeric resistance values to NaN
-    filtered_data['Resistance'] = pd.to_numeric(filtered_data['Resistance'], errors='coerce')
-
-    # Ensure all necessary columns are strings and handle NaN values
-    filtered_data['Species'] = filtered_data['Species'].fillna('Unknown').astype(str)
-    filtered_data['Antibiotics'] = filtered_data['Antibiotics'].fillna('Unknown').astype(str)
-
-    # Drop rows with NaN values in the 'Resistance' column
-    filtered_data = filtered_data.dropna(subset=['Resistance'])
-
-    # Track the final criteria used
-    final_criteria = {}
-
-    # Generate subgroup criteria based on the filtered data
-    if not filtered_data.empty:
-        for column in ['Country', 'Source', 'Antibiotics']:
-            if len(filtered_data[column].unique()) == 1:
-                final_criteria[column] = filtered_data[column].iloc[0]
-
-        top_species = filtered_data['Species'].value_counts().head(3).index.tolist()
-        species_resistance = filtered_data.groupby('Species')['Resistance'].mean().loc[top_species]
-
-        if final_criteria:
-            criteria_str = ', '.join([f'{key}: {value}' for key, value in final_criteria.items()])
-        else:
-            criteria_str = "Entire dataset filtered by 'Country', 'Source', 'Antibiotics'"
-
-        st.write(f"Top 3 most common bacterial species and their resistance levels (Criteria: {criteria_str}):")
-
-        for species, resistance in species_resistance.items():
-            resistance_percentage = resistance * 100
-            st.write(f"**{species}**: Resistance Level: **{resistance_percentage:.2f}%**")
-
     # Display buttons in two columns
     col1, col2 = st.columns(2)
 
     # Button to generate the detailed antibiogram
     with col1:
         if st.button('Antibiogram'):
-            st.write("Generating the detailed antibiogram...")  # Debug message
             if not filtered_data.empty:
-                # Ensure both 'Species', 'Antibiotic', and 'Resistance' columns are valid
-                if (filtered_data['Species'].apply(lambda x: isinstance(x, str)).all() and
-                    filtered_data['Antibiotics'].apply(lambda x: isinstance(x, str)).all() and
-                    filtered_data['Resistance'].apply(lambda x: isinstance(x, (int, float))).all()):
+                # Ensure both 'Species', 'Antibiotic', and 'Resistance' columns are 1-dimensional and scalar
+                if (filtered_data['Species'].apply(lambda x: isinstance(x, str)).all() and 
+                    filtered_data['Antibiotics'].apply(lambda x: isinstance(x, str)).all() and 
+                    filtered_data['Resistance'].apply(lambda x: isinstance(x, str)).all()):
 
                     # Calculate resistance counts and percentages by Species and Antibiotic
                     resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
                     resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
-                    resistance_summary['% Susceptibility'] = (resistance_summary.get(0, 0) / resistance_summary['Total Count']) * 100
+                    resistance_summary['% Susceptibility'] = (resistance_summary.get('Susceptible', 0) / resistance_summary['Total Count']) * 100
                     resistance_summary = resistance_summary.round({'% Susceptibility': 1})
 
                     # Format the percentage with a percentage sign
@@ -215,10 +180,9 @@ with tab1:
                     st.write("Detailed Antibiogram")
                     st.dataframe(styled_summary)
                 else:
-                    st.write("The 'Species', 'Antibiotic', or 'Resistance' column contains non-string or non-numeric data, which cannot be processed.")
+                    st.write("The 'Species', 'Antibiotic', or 'Resistance' column contains non-string data, which cannot be processed.")
             else:
-                st.write("No data available even after relaxing the criteria.")
-
+                st.write("No data available for the selected criteria.")
 
     # Button to show AI triaging result
     with col2:
@@ -229,7 +193,7 @@ with tab1:
                 example_data = pd.DataFrame({
                     'Age.Group': [age],
                     'Country': [country],
-                    'Speciality': [speciality],
+                    'Speciality': [speciality], 
                     'Source': [source],
                     'Antibiotics': [antibiotic]
                 })
@@ -258,16 +222,8 @@ with tab1:
                 # Display the result
                 st.write('Prediction:', susceptibility)
                 st.write("""
-                        Disclaimer: The predictive AI model provided is intended for informational purposes only.
-                        """)
-
-
-
-
-
-
-
-
+                Disclaimer: The predictive AI model provided is intended for informational purposes only.
+                """)
 
 
 
