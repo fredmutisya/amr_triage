@@ -113,7 +113,7 @@ with tab1:
         if filtered_data.empty:
             region = world_bank_data.loc[world_bank_data['Country'] == country, 'Region Countries'].values
             if region.size > 0:
-                region_countries = world_bank_data.loc[world_bank_data['Region'] == region[0], 'Country'].tolist()
+                region_countries = world_bank_data.loc[world_bank_data['Region Countries'] == region[0], 'Country'].tolist()
                 filtered_data = combined_data[
                     (combined_data['Country'].isin(region_countries)) &
                     (combined_data['Source'] == source) &
