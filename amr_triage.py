@@ -147,6 +147,8 @@ with tab1:
 
 
 
+
+    
     with col1:
         if st.button('Antibiogram'):
             if not filtered_data.empty:
@@ -169,7 +171,7 @@ with tab1:
                 else:
                     st.write("No susceptible data available to calculate '% Susceptibility'.")
     
-                # Pivot the DataFrame to have Species as rows and Antibiotics as columns for susceptibility
+                # Reshape the DataFrame so that each antibiotic has its own column
                 pivoted_susceptibility = resistance_summary.pivot_table(index='Species', columns='Antibiotics', values='% Susceptibility', aggfunc='first')
     
                 # Ensure all antibiotics appear, even those not in the filtered data
@@ -199,8 +201,48 @@ with tab1:
                 st.write("Detailed Antibiogram")
                 st.dataframe(styled_summary)
             else:
-                st.write("No data available for the selected criteria.")
+                # If no data found, expand the selection to bordering countries
+                bordering_countries = world_bank_data.loc[world_bank_data['Country'] == country, 'Bordering Countries'].values
+                if bordering_countries.size > 0 and isinstance(bordering_countries[0], str):
+                    bordering_countries_list = bordering_countries[0].split(', ')
+                    filtered_data = combined_data.loc[
+                        (combined_data['Country'].isin(bordering_countries_list)) &
+                        (combined_data['Source'] == source)
+                    ]
+                    
+                    if not filtered_data.empty:
+                        st.write(f"No data for {country}, using bordering countries: {bordering_countries_list}")
+                        # Re-run the antibiogram code with expanded selection
+                        filtered_data.loc[:, 'Species'] = filtered_data['Species'].astype(str).fillna('')
+                        filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
+                        filtered_data.loc[:, 'Resistance'] = pd.to_numeric(filtered_data['Resistance'], errors='coerce').fillna(0).astype(int)
+    
+                        resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
+    
+                        if 0 in resistance_summary.columns:
+                            resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
+                            resistance_summary['% Susceptibility'] = (resistance_summary[0] / resistance_summary['Total Count']) * 100
+                            resistance_summary = resistance_summary.round({'% Susceptibility': 1})
+                            resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].apply(lambda x: f"{x:.1f}%")
+                        else:
+                            st.write("No susceptible data available to calculate '% Susceptibility'.")
+    
+                        pivoted_susceptibility = resistance_summary.pivot_table(index='Species', columns='Antibiotics', values='% Susceptibility', aggfunc='first')
+                        pivoted_susceptibility = pivoted_susceptibility.reindex(columns=all_antibiotics, fill_value='N/A')
+                        total_count = resistance_summary.groupby('Species')['Total Count'].first()
+                        pivoted_susceptibility.insert(0, 'Total Count', total_count)
+    
+                        styled_summary = pivoted_susceptibility.style.applymap(color_format, subset=pd.IndexSlice[:, pivoted_susceptibility.columns[1:]])
+    
+                        st.write("Detailed Antibiogram")
+                        st.dataframe(styled_summary)
+                    else:
+                        st.write(f"No data available for {country} or its bordering countries.")
+                else:
+                    st.write(f"No bordering countries data available for {country}.")
 
+
+    
     
 
 
