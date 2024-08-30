@@ -101,7 +101,7 @@ with tab1:
     if filtered_data.empty:
         # Check for bordering countries
         bordering_countries = world_bank_data.loc[world_bank_data['Country'] == country, 'Bordering Countries'].values
-        if bordering_countries.any():
+        if bordering_countries.size > 0 and isinstance(bordering_countries[0], str):
             bordering_countries_list = bordering_countries[0].split(', ')
             filtered_data = combined_data[
                 (combined_data['Country'].isin(bordering_countries_list)) &
@@ -112,7 +112,7 @@ with tab1:
         # If no data found with bordering countries, check the region
         if filtered_data.empty:
             region = world_bank_data.loc[world_bank_data['Country'] == country, 'Region'].values
-            if region.any():
+            if region.size > 0:
                 region_countries = world_bank_data.loc[world_bank_data['Region'] == region[0], 'Country'].tolist()
                 filtered_data = combined_data[
                     (combined_data['Country'].isin(region_countries)) &
