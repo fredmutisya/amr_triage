@@ -199,12 +199,12 @@ with tab1:
                 if bordering_countries.size > 0 and isinstance(bordering_countries[0], str):
                     bordering_countries_list = bordering_countries[0].split(', ')
                     filtered_data = combined_data.loc[(combined_data['Country'].isin(bordering_countries_list)) & (combined_data['Source'] == source)]
-                    message = f"No data for {country}. Using bordering countries: {', '.join(bordering_countries_list)}"
+                    message = f"No data for {country}and {source}. Using bordering countries: {', '.join(bordering_countries_list)}"
                 else:
                     filtered_data = combined_data.loc[(combined_data['Source'] == source)]
-                    message = f"No data for {country} or its borders. Using the full dataset."
+                    message = f"No data for {country} and {source} or its borders. Using the full dataset."
             else:
-                message = f"Filtering criteria met for: {country}"
+                message = f"Filtering criteria met for: {country} and {source}"
     
             display_antibiogram(filtered_data, message)
 
