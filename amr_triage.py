@@ -103,7 +103,7 @@ with tab1:
     filtered_data = combined_data[
         (combined_data['Country'] == country) &
         (combined_data['Source'] == source) &
-        (combined_data['Antibiotics'] == antibiotic)
+        #(combined_data['Antibiotics'] == antibiotic)
     ]
 
     # Relax the criteria if no exact match is found
