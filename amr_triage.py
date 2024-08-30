@@ -62,9 +62,18 @@ source_sample = Variables["Source"].tolist()
 antibiotics = Variables["Antibiotics"].tolist()
 Speciality = Variables["Speciality"].tolist()
 
+
+# Inject custom CSS to increase the font size of tabs
+st.markdown("""
+    <style>
+    div[data-baseweb="tab"] > button {
+        font-size: 20px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 # Set up the tabs
 tab1, tab2 = st.tabs(["AST Triage Tool", "Performance of Decision trees in AST"])
-
 
 
 
@@ -193,7 +202,7 @@ with tab1:
 
 
     with col1:
-        if st.button('Customised Traige Antibiogram'):
+        if st.button('Customised Triage Antibiogram'):
             if filtered_data.empty:
                 bordering_countries = world_bank_data.loc[world_bank_data['Country'] == country, 'Bordering Countries'].values
                 if bordering_countries.size > 0 and isinstance(bordering_countries[0], str):
