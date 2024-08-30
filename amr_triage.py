@@ -37,7 +37,7 @@ with open("doctor.json") as f:
 with st.sidebar:
     st.sidebar.title("Instructions")
     st.sidebar.info("""
-    Input the patient details into the AST triage tool to assess the urgency of antimicrobial resistance testing.
+    This is an Antibiotic resistance triage tool developed by Dr. Oscar Nyangiri, Dr. Primrose Beryl and Dr. Fred Mutisya as part of the Vivli Data challenge 2024. It makes use of the Pfizer Atlas data and the Venatorx Gears data. Input the patient details into the AST triage tool to assess the urgency of antimicrobial resistance testing.
     """)
     st_lottie(lottie_animation, height=300)
 
