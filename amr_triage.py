@@ -21,13 +21,17 @@ from streamlit_extras.switch_page_button import switch_page
 import json
 from streamlit_lottie import st_lottie
 
+
+
 # Set page configuration
 st.set_page_config(
     page_title="AST Prioritization Tool",
-    page_icon="🧬",
+    page_icon="💊",  # Pill icon
     layout="wide",
     initial_sidebar_state="expanded"  # Sidebar expanded by default
 )
+
+
 
 # Load the Lottie animation
 with open("doctor.json") as f:
