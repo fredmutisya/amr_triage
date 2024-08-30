@@ -158,94 +158,94 @@ with tab1:
             resistance_percentage = resistance * 100
             st.write(f"**{species}**: Resistance Level: **{resistance_percentage:.2f}%**")
     
-    # Button to generate the detailed antibiogram
-    if st.button('Antibiogram'):
-        if not filtered_data.empty:
-            # Ensure both 'Species', 'Antibiotic', and 'Resistance' columns are 1-dimensional and scalar
-            if (filtered_data['Species'].apply(lambda x: isinstance(x, str)).all() and 
-                filtered_data['Antibiotics'].apply(lambda x: isinstance(x, str)).all() and 
-                filtered_data['Resistance'].apply(lambda x: isinstance(x, str)).all()):
+# Button to generate the detailed antibiogram
+if st.button('Antibiogram'):
+    if not filtered_data.empty:
+        # Ensure both 'Species', 'Antibiotic', and 'Resistance' columns are 1-dimensional and scalar
+        if (filtered_data['Species'].apply(lambda x: isinstance(x, str)).all() and 
+            filtered_data['Antibiotics'].apply(lambda x: isinstance(x, str)).all() and 
+            filtered_data['Resistance'].apply(lambda x: isinstance(x, str)).all()):
 
-                # Calculate resistance counts and percentages by Species and Antibiotic
-                resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
-                resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
-                resistance_summary['% Susceptibility'] = (resistance_summary.get('Susceptible', 0) / resistance_summary['Total Count']) * 100
-                resistance_summary = resistance_summary.round({'% Susceptibility': 1})
+            # Calculate resistance counts and percentages by Species and Antibiotic
+            resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
+            resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
+            resistance_summary['% Susceptibility'] = (resistance_summary.get('Susceptible', 0) / resistance_summary['Total Count']) * 100
+            resistance_summary = resistance_summary.round({'% Susceptibility': 1})
 
-                # Format the percentage with a percentage sign
-                resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].apply(lambda x: f"{x:.1f}%")
+            # Format the percentage with a percentage sign
+            resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].apply(lambda x: f"{x:.1f}%")
 
-                # Filter for species with more than 30 total isolates
-                filtered_resistance_summary = resistance_summary[resistance_summary['Total Count'] > 30]
+            # Filter for species with more than 30 total isolates
+            filtered_resistance_summary = resistance_summary[resistance_summary['Total Count'] > 30]
 
-                # Reshape the DataFrame so that each antibiotic has its own column
-                final_summary = filtered_resistance_summary.unstack(level='Antibiotics')['% Susceptibility']
-                final_summary.insert(0, 'Total Count', filtered_resistance_summary.groupby('Species')['Total Count'].first())
+            # Reshape the DataFrame so that each antibiotic has its own column
+            final_summary = filtered_resistance_summary.unstack(level='Antibiotics')['% Susceptibility']
+            final_summary.insert(0, 'Total Count', filtered_resistance_summary.groupby('Species')['Total Count'].first())
 
-                # Function to apply color formatting
-                def color_format(val):
-                    if isinstance(val, str) and val.endswith('%'):
-                        percentage = float(val.rstrip('%'))
-                        if percentage > 75:
-                            color = 'green'
-                        elif 50 <= percentage <= 75:
-                            color = 'orange'
-                        else:
-                            color = 'red'
-                        return f'background-color: {color}'
-                    return ''
+            # Function to apply color formatting
+            def color_format(val):
+                if isinstance(val, str) and val.endswith('%'):
+                    percentage = float(val.rstrip('%'))
+                    if percentage > 75:
+                        color = 'green'
+                    elif 50 <= percentage <= 75:
+                        color = 'orange'
+                    else:
+                        color = 'red'
+                    return f'background-color: {color}'
+                return ''
 
-                # Apply the color formatting to the dataframe
-                styled_summary = final_summary.style.applymap(color_format, subset=pd.IndexSlice[:, final_summary.columns[1:]])
+            # Apply the color formatting to the dataframe
+            styled_summary = final_summary.style.applymap(color_format, subset=pd.IndexSlice[:, final_summary.columns[1:]])
 
-                st.write("Detailed Antibiogram")
-                st.dataframe(styled_summary)
-            else:
-                st.write("The 'Species', 'Antibiotic', or 'Resistance' column contains non-string data, which cannot be processed.")
+            st.write("Detailed Antibiogram")
+            st.dataframe(styled_summary)
         else:
-            st.write("No data available even after relaxing the criteria.")
+            st.write("The 'Species', 'Antibiotic', or 'Resistance' column contains non-string data, which cannot be processed.")
+    else:
+        st.write("No data available even after relaxing the criteria.")
 
-    # Button to show AI triaging result
-    if st.button('AI Triaging Result'):
-        susceptibility = ''
-        if not filtered_data.empty:
-            # Create a DataFrame with the input data for the model
-            example_data = pd.DataFrame({
-                'Age.Group': [age],
-                'Country': [country],
-                'Speciality': [speciality], 
-                'Source': [source],
-                'Antibiotics': [antibiotic]
-            })
+# Button to show AI triaging result
+if st.button('AI Triaging Result'):
+    susceptibility = ''
+    if not filtered_data.empty:
+        # Create a DataFrame with the input data for the model
+        example_data = pd.DataFrame({
+            'Age.Group': [age],
+            'Country': [country],
+            'Speciality': [speciality], 
+            'Source': [source],
+            'Antibiotics': [antibiotic]
+        })
 
-            # Encode the input data (assuming the model requires label encoding)
-            for column in example_data.columns:
-                le = LabelEncoder()
-                example_data[column] = le.fit_transform(example_data[column].astype(str))
+        # Encode the input data (assuming the model requires label encoding)
+        for column in example_data.columns:
+            le = LabelEncoder()
+            example_data[column] = le.fit_transform(example_data[column].astype(str))
 
-            # Ensure the DataFrame aligns with the trained model
-            encoded_values = pd.get_dummies(example_data)
+        # Ensure the DataFrame aligns with the trained model
+        encoded_values = pd.get_dummies(example_data)
 
-            # Align encoded DataFrame with the model's expected feature names
-            encoded_values = encoded_values.reindex(columns=model.feature_names_in_, fill_value=0)
+        # Align encoded DataFrame with the model's expected feature names
+        encoded_values = encoded_values.reindex(columns=model.feature_names_in_, fill_value=0)
 
-            # Predict with the model
-            prediction = model.predict_proba(encoded_values)[0]
+        # Predict with the model
+        prediction = model.predict_proba(encoded_values)[0]
 
-            # Interpret the prediction
-            susceptibility_percentage = prediction[1] * 100  # Probability of resistance
-            if susceptibility_percentage >= 50:
-                susceptibility = f'Strong AST recommendation due to the high probability of resistance in similar cases from surveillance datasets.'
-            else:
-                susceptibility = f'Moderate AST recommendation due to the lower probability of resistance in similar cases from surveillance datasets.'
-
-            # Display the result
-            st.write('Prediction:', susceptibility)
-            st.write("""
-            Disclaimer: The predictive AI model provided is intended for informational purposes only.
-            """)
+        # Interpret the prediction
+        susceptibility_percentage = prediction[1] * 100  # Probability of resistance
+        if susceptibility_percentage >= 50:
+            susceptibility = f'Strong AST recommendation due to the high probability of resistance in similar cases from surveillance datasets.'
         else:
-            st.write("No data available even after relaxing the criteria.")
+            susceptibility = f'Moderate AST recommendation due to the lower probability of resistance in similar cases from surveillance datasets.'
+
+        # Display the result
+        st.write('Prediction:', susceptibility)
+        st.write("""
+        Disclaimer: The predictive AI model provided is intended for informational purposes only.
+        """)
+    else:
+        st.write("No data available even after relaxing the criteria.")
 
 
 
