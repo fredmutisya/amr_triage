@@ -5,6 +5,7 @@ from sklearn.preprocessing import LabelEncoder
 import numpy as np
 import os
 import joblib
+import plotly.graph_objects as go
 
 # Import other necessary modules
 from sklearn.ensemble import RandomForestClassifier
@@ -259,3 +260,24 @@ with tab2:
                 f"and the Number Needed to Misdiagnose (NNM) was **{metrics['NNM (Number Needed to Misdiagnose)']:.2f}**."
             )
             st.write(output)
+
+            # Radar chart for the metrics
+            fig = go.Figure()
+
+            fig.add_trace(go.Scatterpolar(
+                r=[metrics['Sensitivity (Recall)'], metrics['Specificity'], metrics['PPV (Precision)'], metrics['NPV']],
+                theta=['Sensitivity', 'Specificity', 'PPV', 'NPV'],
+                fill='toself',
+                name=source
+            ))
+
+            fig.update_layout(
+                polar=dict(
+                    radialaxis=dict(
+                        visible=True,
+                        range=[0, 1]
+                    )),
+                showlegend=False
+            )
+
+            st.plotly_chart(fig)
