@@ -28,7 +28,7 @@ st.set_page_config(
     page_title="AST Prioritization Tool",
     page_icon="💊",  # Pill icon
     layout="wide",
-    initial_sidebar_state="expanded"  # Sidebar expanded by default
+    initial_sidebar_state="collapsed"  # Sidebar expanded by default
 )
 
 # Define the option menu with custom styling
