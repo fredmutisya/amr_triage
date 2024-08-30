@@ -67,6 +67,12 @@ tab1, tab2 = st.tabs(["AST Triage Tool", "Performance of Decision trees in AST"]
 
 
 
+
+
+
+
+
+
 with tab1:
     # AST Prioritization Tool Interface
     st.title('Antimicrobial Susceptibility Testing (AST) Triage Tool')
@@ -150,6 +156,50 @@ with tab1:
         for species, resistance in species_resistance.items():
             resistance_percentage = resistance * 100
             st.write(f"**{species}**: Resistance Level: **{resistance_percentage:.2f}%**")
+        
+        # New logic to add detailed antibiogram
+        if not filtered_data.empty:
+            # Ensure both 'Species', 'Antibiotic', and 'Resistance' columns are 1-dimensional and scalar
+            if (filtered_data['Species'].apply(lambda x: isinstance(x, str)).all() and 
+                filtered_data['Antibiotics'].apply(lambda x: isinstance(x, str)).all() and 
+                filtered_data['Resistance'].apply(lambda x: isinstance(x, str)).all()):
+
+                # Calculate resistance counts and percentages by Species and Antibiotic
+                resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
+                resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
+                resistance_summary['% Susceptibility'] = (resistance_summary.get('Susceptible', 0) / resistance_summary['Total Count']) * 100
+                resistance_summary = resistance_summary.round({'% Susceptibility': 1})
+
+                # Format the percentage with a percentage sign
+                resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].apply(lambda x: f"{x:.1f}%")
+
+                # Filter for species with more than 30 total isolates
+                filtered_resistance_summary = resistance_summary[resistance_summary['Total Count'] > 30]
+
+                # Reshape the DataFrame so that each antibiotic has its own column
+                final_summary = filtered_resistance_summary.unstack(level='Antibiotics')['% Susceptibility']
+                final_summary.insert(0, 'Total Count', filtered_resistance_summary.groupby('Species')['Total Count'].first())
+
+                # Function to apply color formatting
+                def color_format(val):
+                    if isinstance(val, str) and val.endswith('%'):
+                        percentage = float(val.rstrip('%'))
+                        if percentage > 75:
+                            color = 'green'
+                        elif 50 <= percentage <= 75:
+                            color = 'orange'
+                        else:
+                            color = 'red'
+                        return f'background-color: {color}'
+                    return ''
+
+                # Apply the color formatting to the dataframe
+                styled_summary = final_summary.style.applymap(color_format, subset=pd.IndexSlice[:, final_summary.columns[1:]])
+
+                st.write("Detailed Antibiogram")
+                st.dataframe(styled_summary)
+            else:
+                st.write("The 'Species', 'Antibiotic', or 'Resistance' column contains non-string data, which cannot be processed.")
     else:
         st.write("No data available even after relaxing the criteria.")
 
@@ -191,7 +241,6 @@ with tab1:
         st.write("""
         Disclaimer: The predictive AI model provided is intended for informational purposes only.
         """)
-
 
 
 
