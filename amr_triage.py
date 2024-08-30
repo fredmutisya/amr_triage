@@ -33,8 +33,8 @@ st.set_page_config(
 
 selected_tab = option_menu(
     menu_title=None,
-    options=["AST Triage Tool", "Performance of Decision Trees", "About AST Triage Webapp"],  # Added "About AST Triage Webapp"
-    icons=["🦠", "📊", "ℹ️"],  # Added the information icon for the new tab
+    options=["About AST Triage Webapp", "AST Triage Tool", "Performance of Decision Trees"],  # Added "About AST Triage Webapp"
+    icons=["ℹ️", "🦠", "📊"],  # Added the information icon for the new tab
     orientation="horizontal",
     styles={
         "container": {"padding": "5px", "background-color": "#f0f0f0"},
@@ -111,7 +111,7 @@ if selected_tab == "About AST Triage Webapp":
 
     #### Key Features:
     - **AST Triage Tool**: Helps in assessing the urgency of AST based on patient details.
-    - **Performance of Decision Trees**: Provides tools to evaluate decision tree models on various datasets.
+    - **Performance of Decision Trees**: Provides tools to policy makers for evaluation of decision trees in AST triaging.
 
     #### Developed By:
     - Dr. Oscar Nyangiri
@@ -122,7 +122,7 @@ if selected_tab == "About AST Triage Webapp":
     - Pfizer Atlas Data
     - Venatorx Gears Data
 
-    This tool was developed as part of the Vivli Data Challenge 2024.
+    This tool was developed as part of the Vivli AMR Data Challenge 2024.
 
     **Disclaimer**: The tool is intended for informational purposes only and should not replace professional medical judgment.
     """)
@@ -152,8 +152,8 @@ if selected_tab == "About AST Triage Webapp":
         The webapp generates customized antibiograms based on the patient's details and the selected criteria, such as country and sample source. The filtering mechanism includes:
         
         - **Country**: The data is first filtered by the selected country.
-        - **Bordering Countries**: If no data is found for the selected country, the app checks for neighboring countries that share borders and uses their data.
-        - **Region**: If data is still not available, the app broadens the search to include countries in the same region.
+        - **Bordering Countries**: If no data is found for the selected country, the app checks for neighboring countries that share borders(hence epidemiological linkages) and uses their data.
+        - **Region**: If data is still not available, the app broadens the search to include countries in the same WHO region.
         
         The antibiogram provides a summary of the susceptibility of various species to different antibiotics, helping clinicians make informed decisions about treatment.
         """)
@@ -175,9 +175,10 @@ if selected_tab == "About AST Triage Webapp":
         - **No Need for Feature Scaling**: Decision trees do not require normalization or scaling of data.
         """)
     
+
     with st.expander("5. Performance of the Model for Policy Makers"):
         st.markdown("""
-        Understanding the performance of decision trees in the context of AST is critical for policy makers. Here are some key metrics used to evaluate the model:
+        Understanding the performance of decision trees in the context of AST is critical for policy makers. Model performance can vary with different body sample sources. Here are some key metrics used to evaluate the model:
         """)
     
         st.write("**Accuracy**: The ratio of correctly predicted instances to the total instances.")
@@ -214,11 +215,26 @@ if selected_tab == "About AST Triage Webapp":
         st.latex(r'''
         \text{PSI} = \text{Precision} + \text{NPV} - 1
         ''')
-        
+    
+        st.write("**Number Needed to Diagnose (NND)**: The number of patients that need to be tested to correctly diagnose one patient.")
+        st.latex(r'''
+        \text{NND} = \frac{1}{\text{Youden Index}}
+        ''')
+    
+        st.write("**Number Needed to Predict (NNP)**: The number of predictions needed to correctly predict one positive case.")
+        st.latex(r'''
+        \text{NNP} = \frac{1}{\text{PSI}}
+        ''')
+    
+        st.write("**Number Needed to Misdiagnose (NNM)**: The number of predictions needed to produce one incorrect prediction.")
+        st.latex(r'''
+        \text{NNM} = \frac{1}{1 - \text{Accuracy}}
+        ''')
+    
         st.markdown("""
         These metrics help assess the reliability and robustness of the decision tree model in predicting antimicrobial resistance, supporting informed decision-making for health policies.
         """)
-    
+
 
 
 
