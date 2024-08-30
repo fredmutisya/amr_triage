@@ -54,7 +54,7 @@ combined_data = pd.read_csv(main_data_file)
 combined_data = combined_data.fillna('')
 
 # Load the World Bank countries with borders CSV file
-world_bank_data = pd.read_csv("World_bank_countries_with_borders.csv")
+world_bank_data = pd.read_csv("World_bank_countries_with_borders.csv", encoding='ISO-8859-1')
 
 # Extract predictor names from the Variables CSV file
 countries = Variables["Country"].tolist()
