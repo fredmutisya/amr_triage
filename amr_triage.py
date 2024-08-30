@@ -237,7 +237,15 @@ with tab2:
     results, filter_column = analyze_resistance(main_data_file, 'Source')
     st.write(f"Analysis results based on {filter_column}:")
 
-    for key, value in results.items():
-        st.write(f"**{key}**:")
-        for metric, result in value.items():
-            st.write(f"{metric}: {result}")
+    for source, metrics in results.items():
+        output = (
+            f"For the source **{source}**, the analysis yielded an accuracy of **{metrics['Accuracy']:.2f}** "
+            f"and an AUC of **{metrics['AUC']:.2f}**. The sensitivity (recall) was **{metrics['Sensitivity (Recall)']:.2f}**, "
+            f"while the specificity reached **{metrics['Specificity']:.2f}**. The positive predictive value (PPV or precision) "
+            f"was **{metrics['PPV (Precision)']:.2f}**, and the negative predictive value (NPV) was **{metrics['NPV']:.2f}**. "
+            f"The Youden Index (Y) was calculated at **{metrics['Youden Index (Y)']:.2f}**, and the Predictive Summary Index (PSI or Ψ) "
+            f"stood at **{metrics['Predictive Summary Index (PSI or Ψ)']:.2f}**. Additionally, the Number Needed to Diagnose (NND) "
+            f"was **{metrics['NND (Number Needed to Diagnose)']:.2f}**, the Number Needed to Predict (NNP) was **{metrics['NNP (Number Needed to Predict)']:.2f}**, "
+            f"and the Number Needed to Misdiagnose (NNM) was **{metrics['NNM (Number Needed to Misdiagnose)']:.2f}**."
+        )
+        st.write(output)
