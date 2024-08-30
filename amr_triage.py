@@ -33,7 +33,7 @@ antibiotics = Variables["Antibiotics"].tolist()
 Speciality = Variables["Speciality"].tolist()
 
 # Set up the tabs
-tab1, tab2 = st.tabs(["AST Prioritization Tool", "Resistance Analysis"])
+tab1, tab2 = st.tabs(["AST Triage Tool", "Performance of Decision trees in AST"])
 
 with tab1:
     # AST Prioritization Tool Interface
