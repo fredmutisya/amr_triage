@@ -83,9 +83,9 @@ with tab1:
     """, unsafe_allow_html=True)
 
     # New patient-related input fields as questions
-    age = st.selectbox('What is the age of the patient?', ['0 to 2 Years','3 to 12 Years', '13 to 18 Years', '19 to 64 Years' ,'65 to 84 Years','85 and Over'])
+    age = st.selectbox('What is the age of the patient?', ['0 to 2 Years', '3 to 12 Years', '13 to 18 Years', '19 to 64 Years', '65 to 84 Years', '85 and Over'])
     gender = st.selectbox('What is the gender of the patient?', ['Male', 'Female', 'Other'])
-    speciality  = st.selectbox('What is the speciality of the patient?', Speciality)
+    speciality = st.selectbox('What is the speciality of the patient?', Speciality)
     country = st.selectbox('In which country does the patient reside?', countries)
     history_resistance = st.selectbox('Does the patient have a known history of infection/colonization with resistant pathogens?', ['Yes', 'No'])
     hospitalization_history = st.selectbox('Has the patient been hospitalized, had day-clinic visits, or been in a care facility in the last 6 months?', ['Yes', 'No'])
@@ -145,14 +145,14 @@ with tab1:
 
         top_species = filtered_data['Species'].value_counts().head(3).index.tolist()
         species_resistance = filtered_data.groupby('Species')['Resistance'].mean().loc[top_species]
-    
+
         if final_criteria:
             criteria_str = ', '.join([f'{key}: {value}' for key, value in final_criteria.items()])
         else:
             criteria_str = "Entire dataset filtered by 'Country', 'Source', 'Antibiotics'"
 
         st.write(f"Top 3 most common bacterial species and their resistance levels (Criteria: {criteria_str}):")
-    
+
         for species, resistance in species_resistance.items():
             resistance_percentage = resistance * 100
             st.write(f"**{species}**: Resistance Level: **{resistance_percentage:.2f}%**")
@@ -163,10 +163,11 @@ with tab1:
     # Button to generate the detailed antibiogram
     with col1:
         if st.button('Antibiogram'):
+            st.write("Generating the detailed antibiogram...")  # Debug message
             if not filtered_data.empty:
                 # Ensure both 'Species', 'Antibiotic', and 'Resistance' columns are 1-dimensional and scalar
-                if (filtered_data['Species'].apply(lambda x: isinstance(x, str)).all() and 
-                    filtered_data['Antibiotics'].apply(lambda x: isinstance(x, str)).all() and 
+                if (filtered_data['Species'].apply(lambda x: isinstance(x, str)).all() and
+                    filtered_data['Antibiotics'].apply(lambda x: isinstance(x, str)).all() and
                     filtered_data['Resistance'].apply(lambda x: isinstance(x, str)).all()):
 
                     # Calculate resistance counts and percentages by Species and Antibiotic
@@ -217,7 +218,7 @@ with tab1:
                 example_data = pd.DataFrame({
                     'Age.Group': [age],
                     'Country': [country],
-                    'Speciality': [speciality], 
+                    'Speciality': [speciality],
                     'Source': [source],
                     'Antibiotics': [antibiotic]
                 })
@@ -250,6 +251,7 @@ with tab1:
                         """)
                     else:
                         st.write("No data available even after relaxing the criteria.")
+
 
 
 
