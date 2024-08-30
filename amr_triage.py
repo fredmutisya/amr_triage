@@ -14,6 +14,13 @@ from sklearn.metrics import confusion_matrix, accuracy_score, roc_auc_score
 from sklearn.exceptions import UndefinedMetricWarning
 import warnings
 
+from streamlit_option_menu import option_menu
+from streamlit_extras.switch_page_button import switch_page
+
+# For animation
+import json
+from streamlit_lottie import st_lottie
+
 # Set page configuration
 st.set_page_config(
     page_title="AST Prioritization Tool",
