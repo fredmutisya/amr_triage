@@ -271,9 +271,11 @@ with tab1:
 
 
 
+# Create the second tab
 with tab2:
-    st.title("Performance of the Decision Tree model")
-    st.write('This is a tool for policy makers to test the performance metrics of Decision trees on their own data.')
+    st.title("Performance of the Decision Tree Model")
+    st.write('This is a tool for policy makers to test the performance metrics of Decision Trees on their own data.')
+
     # File uploader for CSV
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     
@@ -284,31 +286,36 @@ with tab2:
     else:
         # Use the default dataset
         st.write("No file uploaded. Using default dataset from Pfizer(ATLAS) and Venatorx(GEARS) surveillance for 2022.")
+        # Assume the combined_data is loaded here (replace with your actual dataset if necessary)
+    
+    if combined_data is not None:
+        # Allow the user to select the source from a dropdown menu
+        selected_source = st.selectbox("Select the source:", combined_data['Source'].unique())
+        
+        # Filter data based on the selected source
+        filtered_data = combined_data[combined_data['Source'] == selected_source]
 
-    def analyze_resistance(data, filter_column='Source'):
-        results = {}
-        filter_values = data[filter_column].unique()
+        def analyze_resistance(data):
+            results = {}
 
-        def calculate_additional_metrics(youden_index, psi, accuracy):
-            nnd = 1 / youden_index if youden_index != 0 else np.inf
-            nnp = 1 / psi if psi != 0 else np.inf
-            nnm = 1 / (1 - accuracy) if accuracy != 1 else np.inf
-            return nnd, nnp, nnm
+            def calculate_additional_metrics(youden_index, psi, accuracy):
+                nnd = 1 / youden_index if youden_index != 0 else np.inf
+                nnp = 1 / psi if psi != 0 else np.inf
+                nnm = 1 / (1 - accuracy) if accuracy != 1 else np.inf
+                return nnd, nnp, nnm
 
-        def calculate_metrics(conf_matrix):
-            tn, fp, fn, tp = conf_matrix.ravel()
-            sensitivity = tp / (tp + fn) if (tp + fn) > 0 else np.nan
-            specificity = tn / (tn + fp) if (tn + fp) > 0 else np.nan
-            ppv = tp / (tp + fp) if (tp + fp) > 0 else np.nan
-            npv = tn / (tn + fn) if (tn + fn) > 0 else np.nan
-            youden_index = sensitivity + specificity - 1
-            psi = ppv + npv - 1
-            return sensitivity, specificity, ppv, npv, youden_index, psi
+            def calculate_metrics(conf_matrix):
+                tn, fp, fn, tp = conf_matrix.ravel()
+                sensitivity = tp / (tp + fn) if (tp + fn) > 0 else np.nan
+                specificity = tn / (tn + fp) if (tn + fp) > 0 else np.nan
+                ppv = tp / (tp + fp) if (tp + fp) > 0 else np.nan
+                npv = tn / (tn + fn) if (tn + fn) > 0 else np.nan
+                youden_index = sensitivity + specificity - 1
+                psi = ppv + npv - 1
+                return sensitivity, specificity, ppv, npv, youden_index, psi
 
-        for value in filter_values:
-            filtered_data = data[data[filter_column] == value]
-            X = filtered_data.drop(columns=['Resistance', filter_column])
-            y = filtered_data['Resistance']
+            X = data.drop(columns=['Resistance', 'Source'])
+            y = data['Resistance']
             X = X.apply(LabelEncoder().fit_transform)
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
             clf = RandomForestClassifier(random_state=42)
@@ -324,7 +331,7 @@ with tab2:
                 auc = roc_auc_score(y_test, y_pred_proba) if len(np.unique(y_test)) > 1 else np.nan
 
             nnd, nnp, nnm = calculate_additional_metrics(youden_index, psi, accuracy)
-            results[value] = {
+            results[selected_source] = {
                 'Confusion Matrix': conf_matrix,
                 'Accuracy': accuracy,
                 'AUC': auc,
@@ -339,16 +346,15 @@ with tab2:
                 'NNM (Number Needed to Misdiagnose)': nnm
             }
 
-        return results, filter_column
+            return results
 
-    if combined_data is not None:
-        st.write("Performing resistance analysis...")
-        results, filter_column = analyze_resistance(combined_data, 'Source')
-        st.write(f"Analysis results based on {filter_column}:")
+        if not filtered_data.empty:
+            st.write(f"Performing resistance analysis for source: {selected_source}")
+            results = analyze_resistance(filtered_data)
+            metrics = results[selected_source]
 
-        for source, metrics in results.items():
             output = (
-                f"For the source **{source}**, the analysis yielded an accuracy of **{metrics['Accuracy']:.2f}** "
+                f"For the source **{selected_source}**, the analysis yielded an accuracy of **{metrics['Accuracy']:.2f}** "
                 f"and an AUC of **{metrics['AUC']:.2f}**. The sensitivity (recall) was **{metrics['Sensitivity (Recall)']:.2f}**, "
                 f"while the specificity reached **{metrics['Specificity']:.2f}**. The positive predictive value (PPV or precision) "
                 f"was **{metrics['PPV (Precision)']:.2f}**, and the negative predictive value (NPV) was **{metrics['NPV']:.2f}**. "
@@ -366,7 +372,7 @@ with tab2:
                 r=[metrics['Sensitivity (Recall)'], metrics['Specificity'], metrics['PPV (Precision)'], metrics['NPV']],
                 theta=['Sensitivity', 'Specificity', 'PPV', 'NPV'],
                 fill='toself',
-                name=source
+                name=selected_source
             ))
 
             fig.update_layout(
@@ -379,3 +385,5 @@ with tab2:
             )
 
             st.plotly_chart(fig)
+        else:
+            st.write(f"No data available for the selected source: {selected_source}")
