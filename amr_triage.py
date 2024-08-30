@@ -34,11 +34,12 @@ with open("doctor.json") as f:
     lottie_animation = json.load(f)
 
 # Display the Lottie animation in the sidebar
-st.sidebar.title("Instructions")
-st.sidebar.info("""
-Input the patient details into the AST triage tool to assess the urgency of antimicrobial resistance testing.
-""")
-st_lottie(lottie_animation, height=300)
+with st.sidebar:
+    st.sidebar.title("Instructions")
+    st.sidebar.info("""
+    Input the patient details into the AST triage tool to assess the urgency of antimicrobial resistance testing.
+    """)
+    st_lottie(lottie_animation, height=300)
 
 # Load saved model
 model = pickle.load(open("decision_tree_model.pkl", 'rb'))
