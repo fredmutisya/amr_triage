@@ -157,8 +157,8 @@ with tab1:
             resistance_percentage = resistance * 100
             st.write(f"**{species}**: Resistance Level: **{resistance_percentage:.2f}%**")
         
-        # New logic to add detailed antibiogram
-        if not filtered_data.empty:
+        # Button to generate the detailed antibiogram
+        if st.button('Consult triaging antibiogram'):
             # Ensure both 'Species', 'Antibiotic', and 'Resistance' columns are 1-dimensional and scalar
             if (filtered_data['Species'].apply(lambda x: isinstance(x, str)).all() and 
                 filtered_data['Antibiotics'].apply(lambda x: isinstance(x, str)).all() and 
@@ -241,8 +241,6 @@ with tab1:
         st.write("""
         Disclaimer: The predictive AI model provided is intended for informational purposes only.
         """)
-
-
 
 
 
