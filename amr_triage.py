@@ -71,7 +71,6 @@ tab1, tab2 = st.tabs(["AST Triage Tool", "Performance of Decision trees in AST"]
 
 
 
-
 with tab1:
     # AST Prioritization Tool Interface
     st.title('Antimicrobial Susceptibility Testing (AST) Triage Tool')
@@ -140,7 +139,7 @@ with tab1:
     with col1:
         if st.button('Antibiogram'):
             if not filtered_data.empty:
-                # Ensure both 'Species', 'Antibiotic', and 'Resistance' columns are 1-dimensional and scalar
+                # Ensure 'Species', 'Antibiotics', and 'Resistance' columns are strings
                 if (filtered_data['Species'].apply(lambda x: isinstance(x, str)).all() and 
                     filtered_data['Antibiotics'].apply(lambda x: isinstance(x, str)).all() and 
                     filtered_data['Resistance'].apply(lambda x: isinstance(x, str)).all()):
@@ -224,6 +223,13 @@ with tab1:
                 st.write("""
                 Disclaimer: The predictive AI model provided is intended for informational purposes only.
                 """)
+
+
+
+
+
+
+
 
 
 
