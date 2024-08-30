@@ -134,12 +134,14 @@ with tab1:
                 if not filtered_data.empty:
                     st.write(f"Data found using region countries: {region_countries}")
 
-        # Ensure all necessary columns are strings and handle NaN values
+    # Map Resistance values to numeric (if not already numeric)
+    resistance_mapping = {'Susceptible': 0, 'Resistant': 1}
+    filtered_data['Resistance'] = filtered_data['Resistance'].map(resistance_mapping).fillna('Unknown').astype(str)
+
+    # Ensure all necessary columns are strings and handle NaN values
     filtered_data['Species'] = filtered_data['Species'].fillna('Unknown').astype(str)
     filtered_data['Antibiotics'] = filtered_data['Antibiotics'].fillna('Unknown').astype(str)
-    filtered_data['Resistance'] = filtered_data['Resistance'].fillna('Unknown').astype(str)
 
-    
     # Track the final criteria used
     final_criteria = {}
 
@@ -174,12 +176,12 @@ with tab1:
                 # Ensure both 'Species', 'Antibiotic', and 'Resistance' columns are 1-dimensional and scalar
                 if (filtered_data['Species'].apply(lambda x: isinstance(x, str)).all() and
                     filtered_data['Antibiotics'].apply(lambda x: isinstance(x, str)).all() and
-                    filtered_data['Resistance'].apply(lambda x: isinstance(x, str)).all()):
+                    filtered_data['Resistance'].apply(lambda x: x.isnumeric()).all()):
 
                     # Calculate resistance counts and percentages by Species and Antibiotic
                     resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
                     resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
-                    resistance_summary['% Susceptibility'] = (resistance_summary.get('Susceptible', 0) / resistance_summary['Total Count']) * 100
+                    resistance_summary['% Susceptibility'] = (resistance_summary.get('0', 0) / resistance_summary['Total Count']) * 100
                     resistance_summary = resistance_summary.round({'% Susceptibility': 1})
 
                     # Format the percentage with a percentage sign
@@ -211,7 +213,7 @@ with tab1:
                     st.write("Detailed Antibiogram")
                     st.dataframe(styled_summary)
                 else:
-                    st.write("The 'Species', 'Antibiotic', or 'Resistance' column contains non-string data, which cannot be processed.")
+                    st.write("The 'Species', 'Antibiotic', or 'Resistance' column contains non-string or non-numeric data, which cannot be processed.")
             else:
                 st.write("No data available even after relaxing the criteria.")
 
