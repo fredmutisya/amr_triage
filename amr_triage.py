@@ -36,7 +36,7 @@ tab1, tab2 = st.tabs(["AST Prioritization Tool", "Resistance Analysis"])
 
 with tab1:
     # AST Prioritization Tool Interface
-    st.title('Antimicrobial Susceptibility Testing (AST) Prioritization Tool')
+    st.title('Antimicrobial Susceptibility Testing (AST) Triage Tool')
     st.markdown("""
     <div style="background-color:#ADD8E6;padding:10px">
     <h2 style="color:white;text-align:center;">Please answer the following questions about the patient:</h2>
@@ -135,7 +135,7 @@ with tab1:
 
     # Prediction code
     susceptibility = ''
-    if st.button('Show AST Model Result'):
+    if st.button('Show AST Triage Result'):
         # Create a DataFrame with the input data for the model
         example_data = pd.DataFrame({
             'Age.Group': [age],
@@ -173,10 +173,20 @@ with tab1:
         """)
 
 with tab2:
-    st.title("Resistance Analysis")
+    st.title("Analysis of the Decision Tree model")
+
+    # File uploader for CSV
+    uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     
-    def analyze_resistance(data_path, filter_column='Source'):
-        data = pd.read_csv(data_path)
+    if uploaded_file is not None:
+        # Load the uploaded CSV file
+        combined_data = pd.read_csv(uploaded_file)
+        combined_data = combined_data.fillna('')
+    else:
+        # Use the default dataset
+        st.write("No file uploaded. Using default dataset.")
+
+    def analyze_resistance(data, filter_column='Source'):
         results = {}
         filter_values = data[filter_column].unique()
 
@@ -232,20 +242,20 @@ with tab2:
 
         return results, filter_column
 
-    # Example usage of the analysis function
-    st.write("Performing resistance analysis...")
-    results, filter_column = analyze_resistance(main_data_file, 'Source')
-    st.write(f"Analysis results based on {filter_column}:")
+    if combined_data is not None:
+        st.write("Performing resistance analysis...")
+        results, filter_column = analyze_resistance(combined_data, 'Source')
+        st.write(f"Analysis results based on {filter_column}:")
 
-    for source, metrics in results.items():
-        output = (
-            f"For the source **{source}**, the analysis yielded an accuracy of **{metrics['Accuracy']:.2f}** "
-            f"and an AUC of **{metrics['AUC']:.2f}**. The sensitivity (recall) was **{metrics['Sensitivity (Recall)']:.2f}**, "
-            f"while the specificity reached **{metrics['Specificity']:.2f}**. The positive predictive value (PPV or precision) "
-            f"was **{metrics['PPV (Precision)']:.2f}**, and the negative predictive value (NPV) was **{metrics['NPV']:.2f}**. "
-            f"The Youden Index (Y) was calculated at **{metrics['Youden Index (Y)']:.2f}**, and the Predictive Summary Index (PSI or Ψ) "
-            f"stood at **{metrics['Predictive Summary Index (PSI or Ψ)']:.2f}**. Additionally, the Number Needed to Diagnose (NND) "
-            f"was **{metrics['NND (Number Needed to Diagnose)']:.2f}**, the Number Needed to Predict (NNP) was **{metrics['NNP (Number Needed to Predict)']:.2f}**, "
-            f"and the Number Needed to Misdiagnose (NNM) was **{metrics['NNM (Number Needed to Misdiagnose)']:.2f}**."
-        )
-        st.write(output)
+        for source, metrics in results.items():
+            output = (
+                f"For the source **{source}**, the analysis yielded an accuracy of **{metrics['Accuracy']:.2f}** "
+                f"and an AUC of **{metrics['AUC']:.2f}**. The sensitivity (recall) was **{metrics['Sensitivity (Recall)']:.2f}**, "
+                f"while the specificity reached **{metrics['Specificity']:.2f}**. The positive predictive value (PPV or precision) "
+                f"was **{metrics['PPV (Precision)']:.2f}**, and the negative predictive value (NPV) was **{metrics['NPV']:.2f}**. "
+                f"The Youden Index (Y) was calculated at **{metrics['Youden Index (Y)']:.2f}**, and the Predictive Summary Index (PSI or Ψ) "
+                f"stood at **{metrics['Predictive Summary Index (PSI or Ψ)']:.2f}**. Additionally, the Number Needed to Diagnose (NND) "
+                f"was **{metrics['NND (Number Needed to Diagnose)']:.2f}**, the Number Needed to Predict (NNP) was **{metrics['NNP (Number Needed to Predict)']:.2f}**, "
+                f"and the Number Needed to Misdiagnose (NNM) was **{metrics['NNM (Number Needed to Misdiagnose)']:.2f}**."
+            )
+            st.write(output)
