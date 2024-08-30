@@ -143,14 +143,14 @@ with tab1:
     # Display buttons in two columns
     col1, col2 = st.columns(2)
 
-    # Button to generate the detailed antibiogram
+
     with col1:
         if st.button('Antibiogram'):
             if not filtered_data.empty:
-                # Ensure that 'Species', 'Antibiotics', and 'Resistance' columns are strings and integers respectively
+                # Ensure that 'Species', 'Antibiotics', and 'Resistance' columns are correctly typed
                 filtered_data.loc[:, 'Species'] = filtered_data['Species'].astype(str).fillna('')
                 filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
-                filtered_data.loc[:, 'Resistance'] = filtered_data['Resistance'].astype(int).fillna(0)
+                filtered_data.loc[:, 'Resistance'] = pd.to_numeric(filtered_data['Resistance'], errors='coerce').fillna(0).astype(int)
     
                 # Calculate resistance counts by Species and Antibiotic
                 resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
@@ -165,7 +165,7 @@ with tab1:
                     resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].apply(lambda x: f"{x:.1f}%")
                 else:
                     st.write("No susceptible data available to calculate '% Susceptibility'.")
-                    
+                    return  # Exit early if the required data isn't available
     
                 # Filter for species with more than 30 total isolates
                 filtered_resistance_summary = resistance_summary[resistance_summary['Total Count'] > 30]
@@ -194,7 +194,11 @@ with tab1:
                 st.dataframe(styled_summary)
             else:
                 st.write("No data available for the selected criteria.")
+    
 
+
+
+    
     # Button to show AI triaging result
     with col2:
         if st.button('AI Triaging Result'):
