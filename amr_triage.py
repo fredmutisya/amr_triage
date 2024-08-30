@@ -33,6 +33,47 @@ st.set_page_config(
 
 
 
+# Inject custom CSS to style the top pane and tabs
+st.markdown("""
+    <style>
+    /* Increase the font size of tabs */
+    div[data-baseweb="tab"] > button {
+        font-size: 40px !important;
+    }
+    
+    /* Style the top pane */
+    .stTabs [role="tablist"] {
+        background-color: #f0f0f0;  /* Light grey background */
+        padding: 20px;  /* Increase padding for larger size */
+        border-radius: 10px;  /* Rounded corners */
+    }
+
+    .stTabs [role="tablist"] > div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Add icons next to the tab titles */
+    .stTabs button:first-child::before {
+        content: "💉 ";  /* Injection icon for the first tab */
+        font-size: 1.5em;
+    }
+    
+    .stTabs button:nth-child(2)::before {
+        content: "📊 ";  /* Bar chart icon for the second tab */
+        font-size: 1.5em;
+    }
+
+    /* Further styling (if needed) */
+    </style>
+    """, unsafe_allow_html=True)
+
+# Set up the tabs with custom styling
+tab1, tab2 = st.tabs(["AST Triage Tool", "Performance of Decision trees in AST"])
+
+
+
 # Load the Lottie animation
 with open("doctor.json") as f:
     lottie_animation = json.load(f)
@@ -75,9 +116,6 @@ st.markdown("""
     }
     </style>
     """, unsafe_allow_html=True)
-
-# Set up the tabs
-tab1, tab2 = st.tabs(["AST Triage Tool", "Performance of Decision trees in AST"])
 
 
 
