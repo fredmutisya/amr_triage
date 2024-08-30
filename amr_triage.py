@@ -37,7 +37,7 @@ st.markdown("""
     <style>
     /* Increase the font size of tabs */
     div[data-baseweb="tab"] > button {
-        font-size: 20px !important;  /* Increase the font size of the tab text */
+        font-size: 40px !important;  /* Increase the font size of the tab text */
     }
     
     /* Style the top pane */
