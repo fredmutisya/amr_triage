@@ -67,7 +67,7 @@ Speciality = Variables["Speciality"].tolist()
 st.markdown("""
     <style>
     div[data-baseweb="tab"] > button {
-        font-size: 20px !important;
+        font-size: 40px !important;
     }
     </style>
     """, unsafe_allow_html=True)
