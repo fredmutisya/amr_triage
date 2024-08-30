@@ -102,7 +102,7 @@ with tab1:
     # Filter the combined dataset based on the selected criteria
     filtered_data = combined_data[
         (combined_data['Country'] == country) &
-        (combined_data['Source'] == source) &
+        (combined_data['Source'] == source) 
         #(combined_data['Antibiotics'] == antibiotic)
     ]
 
