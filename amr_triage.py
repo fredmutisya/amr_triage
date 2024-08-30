@@ -56,13 +56,13 @@ st.markdown("""
 
     /* Add icons next to the tab titles */
     .stTabs button:first-child::before {
-        content: "💉 ";  /* Injection icon for the first tab */
-        font-size: 1.5em;
+        content: "🦠 ";  /* Bacteria/germs icon for the first tab */
+        font-size: 3.5em;
     }
     
     .stTabs button:nth-child(2)::before {
         content: "📊 ";  /* Bar chart icon for the second tab */
-        font-size: 1.5em;
+        font-size: 3.5em;
     }
 
     /* Further styling (if needed) */
