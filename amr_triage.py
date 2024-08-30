@@ -193,18 +193,18 @@ with tab1:
 
 
     with col1:
-        if st.button('Antibiogram'):
+        if st.button('Customised Traige Antibiogram'):
             if filtered_data.empty:
                 bordering_countries = world_bank_data.loc[world_bank_data['Country'] == country, 'Bordering Countries'].values
                 if bordering_countries.size > 0 and isinstance(bordering_countries[0], str):
                     bordering_countries_list = bordering_countries[0].split(', ')
                     filtered_data = combined_data.loc[(combined_data['Country'].isin(bordering_countries_list)) & (combined_data['Source'] == source)]
-                    message = f"No data for {country}and {source}. Using bordering countries: {', '.join(bordering_countries_list)}"
+                    message = f"No data for {country}and {source} for triage antibiogram. Using bordering countries: {', '.join(bordering_countries_list)}"
                 else:
                     filtered_data = combined_data.loc[(combined_data['Source'] == source)]
-                    message = f"No data for {country} and {source} or its borders. Using the full dataset."
+                    message = f"No data for {country} and {source} or its borders. Using the full dataset to make custom triage antibiogram."
             else:
-                message = f"Filtering criteria met for: {country} and {source}"
+                message = f"Triage antibiogram made using filtering criteria of: {country} and {source}"
     
             display_antibiogram(filtered_data, message)
 
