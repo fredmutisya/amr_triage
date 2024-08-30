@@ -149,9 +149,13 @@ with tab1:
 
 
     
+
+
     with col1:
         if st.button('Antibiogram'):
             if not filtered_data.empty:
+                st.write(f"Filtering criteria: Country = {country}, Source = {source}")
+                
                 # Ensure that 'Species', 'Antibiotics', and 'Resistance' columns are correctly typed
                 filtered_data.loc[:, 'Species'] = filtered_data['Species'].astype(str).fillna('')
                 filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
@@ -211,7 +215,8 @@ with tab1:
                     ]
                     
                     if not filtered_data.empty:
-                        st.write(f"No data for {country}, using bordering countries: {bordering_countries_list}")
+                        st.write(f"No data for {country}. Expanded filtering criteria: Bordering Countries = {bordering_countries_list}, Source = {source}")
+                        
                         # Re-run the antibiogram code with expanded selection
                         filtered_data.loc[:, 'Species'] = filtered_data['Species'].astype(str).fillna('')
                         filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
@@ -241,6 +246,7 @@ with tab1:
                 else:
                     st.write(f"No bordering countries data available for {country}.")
 
+    
 
     
     
