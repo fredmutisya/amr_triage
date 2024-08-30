@@ -32,42 +32,28 @@ st.set_page_config(
 )
 
 
+# Define the option menu with custom styling
+selected_tab = option_menu(
+    menu_title=None,
+    options=["AST Triage Tool", "Performance of Decision Trees"],
+    icons=["🦠", "📊"],  # Microbe and bar chart icons
+    orientation="horizontal",
+    styles={
+        "container": {"padding": "0!important", "background-color": "#F7F9F9"},
+        "icon": {"color": "#189AB4", "font-size": "18px"},
+        "nav-link": {
+            "font-size": "16px",
+            "text-align": "left",
+            "margin": "0px",
+            "--hover-color": "#B8DCE7",
+        },
+        "nav-link-selected": {"background-color": "#020659", "color": "white"},
+    },
+)
 
-# Inject custom CSS to style the top pane and tabs
-st.markdown("""
-    <style>
-    /* Increase the font size of tabs */
-    div[data-baseweb="tab"] > button {
-        font-size: 40px !important;
-    }
-    
-    /* Style the top pane */
-    .stTabs [role="tablist"] {
-        background-color: #f0f0f0;  /* Light grey background */
-        padding: 20px;  /* Increase padding for larger size */
-        border-radius: 10px;  /* Rounded corners */
-    }
 
-    .stTabs [role="tablist"] > div {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
 
-    /* Add icons next to the tab titles */
-    .stTabs button:first-child::before {
-        content: "🦠 ";  /* Bacteria/germs icon for the first tab */
-        font-size: 3.5em;
-    }
-    
-    .stTabs button:nth-child(2)::before {
-        content: "📊 ";  /* Bar chart icon for the second tab */
-        font-size: 3.5em;
-    }
 
-    /* Further styling (if needed) */
-    </style>
-    """, unsafe_allow_html=True)
 
 # Set up the tabs with custom styling
 tab1, tab2 = st.tabs(["AST Triage Tool", "Performance of Decision trees in AST"])
