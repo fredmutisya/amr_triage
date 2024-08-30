@@ -71,6 +71,9 @@ tab1, tab2 = st.tabs(["AST Triage Tool", "Performance of Decision trees in AST"]
 
 
 
+
+
+
 with tab1:
     # AST Prioritization Tool Interface
     st.title('Antimicrobial Susceptibility Testing (AST) Triage Tool')
@@ -132,6 +135,11 @@ with tab1:
                 if not filtered_data.empty:
                     st.write(f"Data found using region countries: {region_countries}")
 
+    # Ensure the 'Species', 'Antibiotics', and 'Resistance' columns are strings and handle NaN values
+    filtered_data['Species'] = filtered_data['Species'].astype(str).fillna('')
+    filtered_data['Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
+    filtered_data['Resistance'] = filtered_data['Resistance'].astype(str).fillna('')
+
     # Display buttons in two columns
     col1, col2 = st.columns(2)
 
@@ -139,11 +147,10 @@ with tab1:
     with col1:
         if st.button('Antibiogram'):
             if not filtered_data.empty:
-                # Ensure 'Species', 'Antibiotics', and 'Resistance' columns are strings
                 if (filtered_data['Species'].apply(lambda x: isinstance(x, str)).all() and 
                     filtered_data['Antibiotics'].apply(lambda x: isinstance(x, str)).all() and 
                     filtered_data['Resistance'].apply(lambda x: isinstance(x, str)).all()):
-
+                    
                     # Calculate resistance counts and percentages by Species and Antibiotic
                     resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
                     resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
@@ -223,6 +230,9 @@ with tab1:
                 st.write("""
                 Disclaimer: The predictive AI model provided is intended for informational purposes only.
                 """)
+
+
+
 
 
 
