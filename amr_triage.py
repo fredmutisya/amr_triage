@@ -114,7 +114,7 @@ with tab1:
             bordering_countries_list = bordering_countries[0].split(', ')
             filtered_data = combined_data[
                 (combined_data['Country'].isin(bordering_countries_list)) &
-                (combined_data['Source'] == source) &
+                (combined_data['Source'] == source) 
                 #(combined_data['Antibiotics'] == antibiotic)
             ]
             # If a match is found, use it
@@ -128,7 +128,7 @@ with tab1:
                 region_countries = world_bank_data.loc[world_bank_data['Region Countries'] == region[0], 'Country'].tolist()
                 filtered_data = combined_data[
                     (combined_data['Country'].isin(region_countries)) &
-                    (combined_data['Source'] == source) &
+                    (combined_data['Source'] == source) 
                     #(combined_data['Antibiotics'] == antibiotic)
                 ]
                 # If a match is found, use it
