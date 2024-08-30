@@ -134,13 +134,15 @@ with tab1:
                 if not filtered_data.empty:
                     st.write(f"Data found using region countries: {region_countries}")
 
-    # Map Resistance values to numeric
-    resistance_mapping = {'Susceptible': 0, 'Resistant': 1}
-    filtered_data['Resistance'] = filtered_data['Resistance'].map(resistance_mapping)
+    # Convert non-numeric resistance values to NaN
+    filtered_data['Resistance'] = pd.to_numeric(filtered_data['Resistance'], errors='coerce')
 
     # Ensure all necessary columns are strings and handle NaN values
     filtered_data['Species'] = filtered_data['Species'].fillna('Unknown').astype(str)
     filtered_data['Antibiotics'] = filtered_data['Antibiotics'].fillna('Unknown').astype(str)
+
+    # Drop rows with NaN values in the 'Resistance' column
+    filtered_data = filtered_data.dropna(subset=['Resistance'])
 
     # Track the final criteria used
     final_criteria = {}
@@ -173,7 +175,7 @@ with tab1:
         if st.button('Antibiogram'):
             st.write("Generating the detailed antibiogram...")  # Debug message
             if not filtered_data.empty:
-                # Ensure both 'Species', 'Antibiotic', and 'Resistance' columns are 1-dimensional and scalar
+                # Ensure both 'Species', 'Antibiotic', and 'Resistance' columns are valid
                 if (filtered_data['Species'].apply(lambda x: isinstance(x, str)).all() and
                     filtered_data['Antibiotics'].apply(lambda x: isinstance(x, str)).all() and
                     filtered_data['Resistance'].apply(lambda x: isinstance(x, (int, float))).all()):
