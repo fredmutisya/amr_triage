@@ -136,9 +136,9 @@ with tab1:
                     st.write(f"Data found using region countries: {region_countries}")
 
     # Ensure the 'Species', 'Antibiotics', and 'Resistance' columns are strings and handle NaN values
-    filtered_data['Species'] = filtered_data['Species'].astype(str).fillna('')
-    filtered_data['Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
-    filtered_data['Resistance'] = filtered_data['Resistance'].astype(str).fillna('')
+    filtered_data.loc[:, 'Species'] = filtered_data['Species'].astype(str).fillna('')
+    filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
+    filtered_data.loc[:, 'Resistance'] = filtered_data['Resistance'].astype(str).fillna('')
 
     # Display buttons in two columns
     col1, col2 = st.columns(2)
@@ -154,11 +154,17 @@ with tab1:
                     # Calculate resistance counts and percentages by Species and Antibiotic
                     resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
                     resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
-                    resistance_summary['% Susceptibility'] = (resistance_summary.get[0] / resistance_summary['Total Count']) * 100
-                    resistance_summary = resistance_summary.round({'% Susceptibility': 1})
-
-                    # Format the percentage with a percentage sign
-                    resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].apply(lambda x: f"{x:.1f}%")
+                    
+                    # Ensure that the 'Susceptible' column exists before calculating % Susceptibility
+                    if 'Susceptible' in resistance_summary.columns:
+                        resistance_summary['% Susceptibility'] = (resistance_summary['Susceptible'] / resistance_summary['Total Count']) * 100
+                        resistance_summary = resistance_summary.round({'% Susceptibility': 1})
+                        
+                        # Format the percentage with a percentage sign
+                        resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].apply(lambda x: f"{x:.1f}%")
+                    else:
+                        st.write("No 'Susceptible' data available to calculate '% Susceptibility'.")
+                        return  # Exit early if the required data isn't available
 
                     # Filter for species with more than 30 total isolates
                     filtered_resistance_summary = resistance_summary[resistance_summary['Total Count'] > 30]
