@@ -110,7 +110,7 @@ if selected_tab == "AST Triage Tool":
     # AST Prioritization Tool Interface
     st.title('Antimicrobial Susceptibility Testing (AST) Triage Tool')
     st.markdown("""
-    <div style="background-color:#ADD8E6;padding:10px">
+    <div style="background-color:#189AB4;padding:10px">
     <h2 style="color:white;text-align:center;">Please answer the following questions about the patient:</h2>
     </div>
     """, unsafe_allow_html=True)
