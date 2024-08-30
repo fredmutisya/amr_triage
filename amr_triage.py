@@ -65,6 +65,8 @@ Speciality = Variables["Speciality"].tolist()
 # Set up the tabs
 tab1, tab2 = st.tabs(["AST Triage Tool", "Performance of Decision trees in AST"])
 
+
+
 with tab1:
     # AST Prioritization Tool Interface
     st.title('Antimicrobial Susceptibility Testing (AST) Triage Tool')
@@ -108,7 +110,10 @@ with tab1:
                 (combined_data['Source'] == source) &
                 (combined_data['Antibiotics'] == antibiotic)
             ]
-        
+            # If a match is found, use it
+            if not filtered_data.empty:
+                st.write(f"Data found using bordering countries: {bordering_countries_list}")
+
         # If no data found with bordering countries, check the region
         if filtered_data.empty:
             region = world_bank_data.loc[world_bank_data['Country'] == country, 'Region Countries'].values
@@ -119,6 +124,9 @@ with tab1:
                     (combined_data['Source'] == source) &
                     (combined_data['Antibiotics'] == antibiotic)
                 ]
+                # If a match is found, use it
+                if not filtered_data.empty:
+                    st.write(f"Data found using region countries: {region_countries}")
 
     # Track the final criteria used
     final_criteria = {}
@@ -183,11 +191,6 @@ with tab1:
         st.write("""
         Disclaimer: The predictive AI model provided is intended for informational purposes only.
         """)
-
-
-
-
-
 
 
 
