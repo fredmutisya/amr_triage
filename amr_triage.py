@@ -249,8 +249,7 @@ with tab1:
                 st.write("""
                         Disclaimer: The predictive AI model provided is intended for informational purposes only.
                         """)
-                    else:
-                        st.write("No data available even after relaxing the criteria.")
+
 
 
 
