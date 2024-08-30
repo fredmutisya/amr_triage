@@ -149,46 +149,46 @@ with tab1:
 
 
     
-
-
-# Function to format colors based on susceptibility percentage
-def color_format(val):
-    if isinstance(val, str) and val.endswith('%'):
-        percentage = float(val.rstrip('%'))
-        if percentage > 75:
-            return 'background-color: green'
-        elif 50 <= percentage <= 75:
-            return 'background-color: orange'
+    
+    
+    # Function to format colors based on susceptibility percentage
+    def color_format(val):
+        if isinstance(val, str) and val.endswith('%'):
+            percentage = float(val.rstrip('%'))
+            if percentage > 75:
+                return 'background-color: green'
+            elif 50 <= percentage <= 75:
+                return 'background-color: orange'
+            else:
+                return 'background-color: red'
+        return ''
+    
+    # Function to calculate and display antibiogram
+    def display_antibiogram(filtered_data, message):
+        if not filtered_data.empty:
+            st.write(message)
+            filtered_data['Species'] = filtered_data['Species'].astype(str).fillna('')
+            filtered_data['Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
+            filtered_data['Resistance'] = pd.to_numeric(filtered_data['Resistance'], errors='coerce').fillna(0).astype(int)
+    
+            resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
+            if 0 in resistance_summary.columns:
+                resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
+                resistance_summary['% Susceptibility'] = (resistance_summary[0] / resistance_summary['Total Count']) * 100
+                resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].round(1).apply(lambda x: f"{x:.1f}%")
+            else:
+                st.write("No susceptible data available to calculate '% Susceptibility'.")
+    
+            pivoted_susceptibility = resistance_summary.pivot_table(index='Species', columns='Antibiotics', values='% Susceptibility', aggfunc='first')
+            all_antibiotics = combined_data['Antibiotics'].unique()
+            pivoted_susceptibility = pivoted_susceptibility.reindex(columns=all_antibiotics, fill_value='N/A')
+            pivoted_susceptibility.insert(0, 'Total Count', resistance_summary.groupby('Species')['Total Count'].first())
+    
+            styled_summary = pivoted_susceptibility.style.applymap(color_format, subset=pd.IndexSlice[:, pivoted_susceptibility.columns[1:]])
+            st.write("Detailed Antibiogram")
+            st.dataframe(styled_summary)
         else:
-            return 'background-color: red'
-    return ''
-
-# Function to calculate and display antibiogram
-def display_antibiogram(filtered_data, message):
-    if not filtered_data.empty:
-        st.write(message)
-        filtered_data['Species'] = filtered_data['Species'].astype(str).fillna('')
-        filtered_data['Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
-        filtered_data['Resistance'] = pd.to_numeric(filtered_data['Resistance'], errors='coerce').fillna(0).astype(int)
-
-        resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
-        if 0 in resistance_summary.columns:
-            resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
-            resistance_summary['% Susceptibility'] = (resistance_summary[0] / resistance_summary['Total Count']) * 100
-            resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].round(1).apply(lambda x: f"{x:.1f}%")
-        else:
-            st.write("No susceptible data available to calculate '% Susceptibility'.")
-
-        pivoted_susceptibility = resistance_summary.pivot_table(index='Species', columns='Antibiotics', values='% Susceptibility', aggfunc='first')
-        all_antibiotics = combined_data['Antibiotics'].unique()
-        pivoted_susceptibility = pivoted_susceptibility.reindex(columns=all_antibiotics, fill_value='N/A')
-        pivoted_susceptibility.insert(0, 'Total Count', resistance_summary.groupby('Species')['Total Count'].first())
-
-        styled_summary = pivoted_susceptibility.style.applymap(color_format, subset=pd.IndexSlice[:, pivoted_susceptibility.columns[1:]])
-        st.write("Detailed Antibiogram")
-        st.dataframe(styled_summary)
-    else:
-        st.write(f"No data found. {message}")
+            st.write(f"No data found. {message}")
 
 
 
