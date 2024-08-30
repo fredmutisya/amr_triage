@@ -174,8 +174,8 @@ with tab1:
         """)
 
 with tab2:
-    st.title("Analysis of the Decision Tree model")
-
+    st.title("Performance of the Decision Tree model")
+    st.write('This is a tool for policy makers to test the performance metrics of Decision trees on their own data.')
     # File uploader for CSV
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     
@@ -185,7 +185,7 @@ with tab2:
         combined_data = combined_data.fillna('')
     else:
         # Use the default dataset
-        st.write("No file uploaded. Using default dataset.")
+        st.write("No file uploaded. Using default dataset from Pfizer(ATLAS) and Venatorx(GEARS) surveillance for 2022.")
 
     def analyze_resistance(data, filter_column='Source'):
         results = {}
