@@ -146,12 +146,13 @@ with tab1:
 
 
 
+
     with col1:
         if st.button('Antibiogram'):
             if not filtered_data.empty:
                 # Ensure that 'Species', 'Antibiotics', and 'Resistance' columns are correctly typed
                 filtered_data.loc[:, 'Species'] = filtered_data['Species'].astype(str).fillna('')
-                #filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
+                filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
                 filtered_data.loc[:, 'Resistance'] = pd.to_numeric(filtered_data['Resistance'], errors='coerce').fillna(0).astype(int)
     
                 # Calculate resistance counts by Species and Antibiotic
@@ -168,8 +169,12 @@ with tab1:
                 else:
                     st.write("No susceptible data available to calculate '% Susceptibility'.")
     
-                # Reshape the DataFrame so that each antibiotic has its own column
+                # Pivot the DataFrame to have Species as rows and Antibiotics as columns for susceptibility
                 pivoted_susceptibility = resistance_summary.pivot_table(index='Species', columns='Antibiotics', values='% Susceptibility', aggfunc='first')
+    
+                # Ensure all antibiotics appear, even those not in the filtered data
+                all_antibiotics = combined_data['Antibiotics'].unique()
+                pivoted_susceptibility = pivoted_susceptibility.reindex(columns=all_antibiotics, fill_value='N/A')
     
                 # Get the total count of each species (across all antibiotics) and insert it as the first column
                 total_count = resistance_summary.groupby('Species')['Total Count'].first()
@@ -196,6 +201,7 @@ with tab1:
             else:
                 st.write("No data available for the selected criteria.")
 
+    
 
 
 
