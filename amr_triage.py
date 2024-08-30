@@ -154,7 +154,7 @@ with tab1:
                     # Calculate resistance counts and percentages by Species and Antibiotic
                     resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
                     resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
-                    resistance_summary['% Susceptibility'] = (resistance_summary.get('Susceptible', 0) / resistance_summary['Total Count']) * 100
+                    resistance_summary['% Susceptibility'] = (resistance_summary.get[0] / resistance_summary['Total Count']) * 100
                     resistance_summary = resistance_summary.round({'% Susceptibility': 1})
 
                     # Format the percentage with a percentage sign
