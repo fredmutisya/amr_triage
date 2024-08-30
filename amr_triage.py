@@ -115,7 +115,7 @@ with tab1:
             filtered_data = combined_data[
                 (combined_data['Country'].isin(bordering_countries_list)) &
                 (combined_data['Source'] == source) &
-                (combined_data['Antibiotics'] == antibiotic)
+                #(combined_data['Antibiotics'] == antibiotic)
             ]
             # If a match is found, use it
             if not filtered_data.empty:
@@ -129,7 +129,7 @@ with tab1:
                 filtered_data = combined_data[
                     (combined_data['Country'].isin(region_countries)) &
                     (combined_data['Source'] == source) &
-                    (combined_data['Antibiotics'] == antibiotic)
+                    #(combined_data['Antibiotics'] == antibiotic)
                 ]
                 # If a match is found, use it
                 if not filtered_data.empty:
@@ -137,7 +137,7 @@ with tab1:
 
     # Ensure the 'Species', 'Antibiotics', and 'Resistance' columns are strings and handle NaN values
     filtered_data.loc[:, 'Species'] = filtered_data['Species'].astype(str).fillna('')
-    filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
+    #filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
     filtered_data.loc[:, 'Resistance'] = filtered_data['Resistance'].astype(str).fillna('')
 
     # Display buttons in two columns
@@ -151,7 +151,7 @@ with tab1:
             if not filtered_data.empty:
                 # Ensure that 'Species', 'Antibiotics', and 'Resistance' columns are correctly typed
                 filtered_data.loc[:, 'Species'] = filtered_data['Species'].astype(str).fillna('')
-                filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
+                #filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
                 filtered_data.loc[:, 'Resistance'] = pd.to_numeric(filtered_data['Resistance'], errors='coerce').fillna(0).astype(int)
     
                 # Calculate resistance counts by Species and Antibiotic
