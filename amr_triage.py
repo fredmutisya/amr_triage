@@ -147,54 +147,54 @@ with tab1:
 
 
     with col1:
-    if st.button('Antibiogram'):
-        if not filtered_data.empty:
-            # Ensure that 'Species', 'Antibiotics', and 'Resistance' columns are correctly typed
-            filtered_data.loc[:, 'Species'] = filtered_data['Species'].astype(str).fillna('')
-            filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
-            filtered_data.loc[:, 'Resistance'] = pd.to_numeric(filtered_data['Resistance'], errors='coerce').fillna(0).astype(int)
-
-            # Calculate resistance counts by Species and Antibiotic
-            resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
-
-            # Check if the '0' (Susceptible) column exists
-            if 0 in resistance_summary.columns:
-                resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
-                resistance_summary['% Susceptibility'] = (resistance_summary[0] / resistance_summary['Total Count']) * 100
-                resistance_summary = resistance_summary.round({'% Susceptibility': 1})
-                
-                # Format the percentage with a percentage sign
-                resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].apply(lambda x: f"{x:.1f}%")
+        if st.button('Antibiogram'):
+            if not filtered_data.empty:
+                # Ensure that 'Species', 'Antibiotics', and 'Resistance' columns are correctly typed
+                filtered_data.loc[:, 'Species'] = filtered_data['Species'].astype(str).fillna('')
+                filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
+                filtered_data.loc[:, 'Resistance'] = pd.to_numeric(filtered_data['Resistance'], errors='coerce').fillna(0).astype(int)
+    
+                # Calculate resistance counts by Species and Antibiotic
+                resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
+    
+                # Check if the '0' (Susceptible) column exists
+                if 0 in resistance_summary.columns:
+                    resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
+                    resistance_summary['% Susceptibility'] = (resistance_summary[0] / resistance_summary['Total Count']) * 100
+                    resistance_summary = resistance_summary.round({'% Susceptibility': 1})
+                    
+                    # Format the percentage with a percentage sign
+                    resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].apply(lambda x: f"{x:.1f}%")
+                else:
+                    st.write("No susceptible data available to calculate '% Susceptibility'.")
+    
+                # Reshape the DataFrame so that each antibiotic has its own column
+                pivoted_susceptibility = resistance_summary.pivot_table(index='Species', columns='Antibiotics', values='% Susceptibility', aggfunc='first')
+    
+                # Get the total count of each species (across all antibiotics) and insert it as the first column
+                total_count = resistance_summary.groupby('Species')['Total Count'].first()
+                pivoted_susceptibility.insert(0, 'Total Count', total_count)
+    
+                # Function to apply color formatting
+                def color_format(val):
+                    if isinstance(val, str) and val.endswith('%'):
+                        percentage = float(val.rstrip('%'))
+                        if percentage > 75:
+                            color = 'green'
+                        elif 50 <= percentage <= 75:
+                            color = 'orange'
+                        else:
+                            color = 'red'
+                        return f'background-color: {color}'
+                    return ''
+    
+                # Apply the color formatting to the dataframe
+                styled_summary = pivoted_susceptibility.style.applymap(color_format, subset=pd.IndexSlice[:, pivoted_susceptibility.columns[1:]])
+    
+                st.write("Detailed Antibiogram")
+                st.dataframe(styled_summary)
             else:
-                st.write("No susceptible data available to calculate '% Susceptibility'.")
-
-            # Reshape the DataFrame so that each antibiotic has its own column
-            pivoted_susceptibility = resistance_summary.pivot_table(index='Species', columns='Antibiotics', values='% Susceptibility', aggfunc='first')
-
-            # Get the total count of each species (across all antibiotics) and insert it as the first column
-            total_count = resistance_summary.groupby('Species')['Total Count'].first()
-            pivoted_susceptibility.insert(0, 'Total Count', total_count)
-
-            # Function to apply color formatting
-            def color_format(val):
-                if isinstance(val, str) and val.endswith('%'):
-                    percentage = float(val.rstrip('%'))
-                    if percentage > 75:
-                        color = 'green'
-                    elif 50 <= percentage <= 75:
-                        color = 'orange'
-                    else:
-                        color = 'red'
-                    return f'background-color: {color}'
-                return ''
-
-            # Apply the color formatting to the dataframe
-            styled_summary = pivoted_susceptibility.style.applymap(color_format, subset=pd.IndexSlice[:, pivoted_susceptibility.columns[1:]])
-
-            st.write("Detailed Antibiogram")
-            st.dataframe(styled_summary)
-        else:
-            st.write("No data available for the selected criteria.")
+                st.write("No data available for the selected criteria.")
 
 
 
