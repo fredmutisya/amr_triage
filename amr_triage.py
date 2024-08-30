@@ -39,12 +39,12 @@ selected_tab = option_menu(
     orientation="horizontal",
     styles={
         "container": {"padding": "5px", "background-color": "#f0f0f0"},
-        "icon": {"color": "#189AB4", "font-size": "24px"},  # Increase icon size
+        "icon": {"color": "#ADD8E6", "font-size": "24px"},  # Increase icon size
         "nav-link": {
             "font-size": "24px",  # Increase font size
             "text-align": "center",
             "margin": "0px",
-            "--hover-color": "#B8DCE7",
+            "--hover-color": "#189AB4",
         },
         "nav-link-selected": {"background-color": "#020659", "color": "white"},
     },
