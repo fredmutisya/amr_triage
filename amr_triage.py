@@ -37,7 +37,7 @@ with open("doctor.json") as f:
 with st.sidebar:
     st.sidebar.title("Instructions")
     st.sidebar.info("""
-    This is an Antibiotic resistance triage tool developed by Dr. Oscar Nyangiri, Dr. Primrose Beryl and Dr. Fred Mutisya as part of the Vivli Data challenge 2024. It makes use of the Pfizer Atlas data and the Venatorx Gears data. Input the patient details into the AST triage tool to assess the urgency of antimicrobial resistance testing.
+    This is an Antibiotic resistance triage tool developed by Dr. Oscar Nyangiri, Dr. Primrose Beryl, and Dr. Fred Mutisya as part of the Vivli Data challenge 2024. It makes use of the Pfizer Atlas data and the Venatorx Gears data. Input the patient details into the AST triage tool to assess the urgency of antimicrobial resistance testing.
     """)
     st_lottie(lottie_animation, height=300)
 
@@ -52,6 +52,9 @@ Variables = Variables.fillna('')
 main_data_file = "combined_gears_atlas.csv"
 combined_data = pd.read_csv(main_data_file)
 combined_data = combined_data.fillna('')
+
+# Load the World Bank countries with borders CSV file
+world_bank_data = pd.read_csv("World_bank_countries_with_borders.csv")
 
 # Extract predictor names from the Variables CSV file
 countries = Variables["Country"].tolist()
@@ -90,58 +93,39 @@ with tab1:
     # Filter the combined dataset based on the selected criteria
     filtered_data = combined_data[
         (combined_data['Country'] == country) &
-        (combined_data['Gender'] == gender) &
         (combined_data['Source'] == source) &
-        (combined_data['Speciality'] == speciality) &
-        (combined_data['Antibiotics'] == antibiotic) &
-        (combined_data['Age.Group'] == age)
+        (combined_data['Antibiotics'] == antibiotic)
     ]
+
+    # Relax the criteria if no exact match is found
+    if filtered_data.empty:
+        # Check for bordering countries
+        bordering_countries = world_bank_data.loc[world_bank_data['Country'] == country, 'Bordering Countries'].values
+        if bordering_countries.any():
+            bordering_countries_list = bordering_countries[0].split(', ')
+            filtered_data = combined_data[
+                (combined_data['Country'].isin(bordering_countries_list)) &
+                (combined_data['Source'] == source) &
+                (combined_data['Antibiotics'] == antibiotic)
+            ]
+        
+        # If no data found with bordering countries, check the region
+        if filtered_data.empty:
+            region = world_bank_data.loc[world_bank_data['Country'] == country, 'Region'].values
+            if region.any():
+                region_countries = world_bank_data.loc[world_bank_data['Region'] == region[0], 'Country'].tolist()
+                filtered_data = combined_data[
+                    (combined_data['Country'].isin(region_countries)) &
+                    (combined_data['Source'] == source) &
+                    (combined_data['Antibiotics'] == antibiotic)
+                ]
 
     # Track the final criteria used
     final_criteria = {}
 
-    # If no exact match, relax the criteria step by step
-    if filtered_data.empty:
-        filtered_data = combined_data[
-            (combined_data['Country'] == country) &
-            (combined_data['Gender'] == gender) &
-            (combined_data['Speciality'] == speciality) &
-            (combined_data['Antibiotics'] == antibiotic) &
-            (combined_data['Age.Group'] == age)
-        ]
-        final_criteria = {'Country': country, 'Gender': gender, 'Speciality': speciality, 'Antibiotics': antibiotic, 'Age.Group': age}
-    
-        if filtered_data.empty:
-            filtered_data = combined_data[
-                (combined_data['Country'] == country) &
-                (combined_data['Gender'] == gender) &
-                (combined_data['Antibiotics'] == antibiotic) &
-                (combined_data['Age.Group'] == age)
-            ]
-            final_criteria = {'Country': country, 'Gender': gender, 'Antibiotics': antibiotic, 'Age.Group': age}
-        
-            if filtered_data.empty:
-                filtered_data = combined_data[
-                    (combined_data['Country'] == country) &
-                    (combined_data['Gender'] == gender) &
-                    (combined_data['Antibiotics'] == antibiotic)
-                ]
-                final_criteria = {'Country': country, 'Gender': gender, 'Antibiotics': antibiotic}
-
-                if filtered_data.empty:
-                    filtered_data = combined_data[
-                        (combined_data['Country'] == country) &
-                        (combined_data['Antibiotics'] == antibiotic)
-                    ]
-                    final_criteria = {'Country': country, 'Antibiotics': antibiotic}
-
-                    if filtered_data.empty:
-                        filtered_data = combined_data.copy()
-                        final_criteria = {}
-
     # Generate subgroup criteria based on the filtered data
     if not filtered_data.empty:
-        for column in ['Country', 'Gender', 'Source', 'Speciality', 'Antibiotics', 'Age.Group']:
+        for column in ['Country', 'Source', 'Antibiotics']:
             if len(filtered_data[column].unique()) == 1:
                 final_criteria[column] = filtered_data[column].iloc[0]
 
@@ -151,7 +135,7 @@ with tab1:
         if final_criteria:
             criteria_str = ', '.join([f'{key}: {value}' for key, value in final_criteria.items()])
         else:
-            criteria_str = "Entire dataset filtered by 'Country', 'Gender', 'Source', 'Speciality', 'Antibiotics', 'Age.Group'"
+            criteria_str = "Entire dataset filtered by 'Country', 'Source', 'Antibiotics'"
 
         st.write(f"Top 3 most common bacterial species and their resistance levels (Criteria: {criteria_str}):")
     
@@ -199,6 +183,27 @@ with tab1:
         st.write("""
         Disclaimer: The predictive AI model provided is intended for informational purposes only.
         """)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 with tab2:
     st.title("Performance of the Decision Tree model")
