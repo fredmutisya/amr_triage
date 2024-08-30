@@ -21,13 +21,39 @@ from streamlit_extras.switch_page_button import switch_page
 import json
 from streamlit_lottie import st_lottie
 
+
+
 # Set page configuration
 st.set_page_config(
     page_title="AST Prioritization Tool",
-    page_icon="🧬",
+    page_icon="💊",  # Pill icon
     layout="wide",
     initial_sidebar_state="expanded"  # Sidebar expanded by default
 )
+
+# Define the option menu with custom styling
+selected_tab = option_menu(
+    menu_title=None,
+    options=["AST Triage Tool", "Performance of Decision Trees"],
+    icons=["🦠", "📊"],  # Microbe and bar chart icons
+    orientation="horizontal",
+    styles={
+        "container": {"padding": "5px", "background-color": "#f0f0f0"},
+        "icon": {"color": "#ADD8E6", "font-size": "24px"},  # Increase icon size
+        "nav-link": {
+            "font-size": "24px",  # Increase font size
+            "text-align": "center",
+            "margin": "0px",
+            "--hover-color": "#189AB4",
+        },
+        "nav-link-selected": {"background-color": "#020659", "color": "white"},
+    },
+)
+
+
+
+
+
 
 # Load the Lottie animation
 with open("doctor.json") as f:
@@ -54,7 +80,7 @@ combined_data = pd.read_csv(main_data_file)
 combined_data = combined_data.fillna('')
 
 # Load the World Bank countries with borders CSV file
-world_bank_data = pd.read_csv("World_bank_countries_with_borders.csv")
+world_bank_data = pd.read_csv("World_bank_countries_with_borders.csv", encoding='ISO-8859-1')
 
 # Extract predictor names from the Variables CSV file
 countries = Variables["Country"].tolist()
@@ -62,22 +88,37 @@ source_sample = Variables["Source"].tolist()
 antibiotics = Variables["Antibiotics"].tolist()
 Speciality = Variables["Speciality"].tolist()
 
-# Set up the tabs
-tab1, tab2 = st.tabs(["AST Triage Tool", "Performance of Decision trees in AST"])
 
-with tab1:
+# Inject custom CSS to increase the font size of tabs
+st.markdown("""
+    <style>
+    div[data-baseweb="tab"] > button {
+        font-size: 40px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
+
+
+
+
+
+
+
+if selected_tab == "AST Triage Tool":
     # AST Prioritization Tool Interface
     st.title('Antimicrobial Susceptibility Testing (AST) Triage Tool')
     st.markdown("""
-    <div style="background-color:#ADD8E6;padding:10px">
+    <div style="background-color:#484a4d;padding:10px">
     <h2 style="color:white;text-align:center;">Please answer the following questions about the patient:</h2>
     </div>
     """, unsafe_allow_html=True)
 
     # New patient-related input fields as questions
-    age = st.selectbox('What is the age of the patient?', ['0 to 2 Years','3 to 12 Years', '13 to 18 Years', '19 to 64 Years' ,'65 to 84 Years','85 and Over'])
+    age = st.selectbox('What is the age of the patient?', ['0 to 2 Years', '3 to 12 Years', '13 to 18 Years', '19 to 64 Years', '65 to 84 Years', '85 and Over'])
     gender = st.selectbox('What is the gender of the patient?', ['Male', 'Female', 'Other'])
-    speciality  = st.selectbox('What is the speciality of the patient?', Speciality)
+    speciality = st.selectbox('What is the speciality of the patient?', Speciality)
     country = st.selectbox('In which country does the patient reside?', countries)
     history_resistance = st.selectbox('Does the patient have a known history of infection/colonization with resistant pathogens?', ['Yes', 'No'])
     hospitalization_history = st.selectbox('Has the patient been hospitalized, had day-clinic visits, or been in a care facility in the last 6 months?', ['Yes', 'No'])
@@ -93,99 +134,157 @@ with tab1:
     # Filter the combined dataset based on the selected criteria
     filtered_data = combined_data[
         (combined_data['Country'] == country) &
-        (combined_data['Source'] == source) &
-        (combined_data['Antibiotics'] == antibiotic)
+        (combined_data['Source'] == source) 
+        #(combined_data['Antibiotics'] == antibiotic)
     ]
 
     # Relax the criteria if no exact match is found
     if filtered_data.empty:
         # Check for bordering countries
         bordering_countries = world_bank_data.loc[world_bank_data['Country'] == country, 'Bordering Countries'].values
-        if bordering_countries.any():
+        if bordering_countries.size > 0 and isinstance(bordering_countries[0], str):
             bordering_countries_list = bordering_countries[0].split(', ')
             filtered_data = combined_data[
                 (combined_data['Country'].isin(bordering_countries_list)) &
-                (combined_data['Source'] == source) &
-                (combined_data['Antibiotics'] == antibiotic)
+                (combined_data['Source'] == source) 
+                #(combined_data['Antibiotics'] == antibiotic)
             ]
-        
+            # If a match is found, use it
+            if not filtered_data.empty:
+                st.write(f"Data found using bordering countries: {bordering_countries_list}")
+
         # If no data found with bordering countries, check the region
         if filtered_data.empty:
-            region = world_bank_data.loc[world_bank_data['Country'] == country, 'Region'].values
-            if region.any():
-                region_countries = world_bank_data.loc[world_bank_data['Region'] == region[0], 'Country'].tolist()
+            region = world_bank_data.loc[world_bank_data['Country'] == country, 'Region Countries'].values
+            if region.size > 0:
+                region_countries = world_bank_data.loc[world_bank_data['Region Countries'] == region[0], 'Country'].tolist()
                 filtered_data = combined_data[
                     (combined_data['Country'].isin(region_countries)) &
-                    (combined_data['Source'] == source) &
-                    (combined_data['Antibiotics'] == antibiotic)
+                    (combined_data['Source'] == source) 
+                    #(combined_data['Antibiotics'] == antibiotic)
                 ]
+                # If a match is found, use it
+                if not filtered_data.empty:
+                    st.write(f"Data found using region countries: {region_countries}")
 
-    # Track the final criteria used
-    final_criteria = {}
+    # Ensure the 'Species', 'Antibiotics', and 'Resistance' columns are strings and handle NaN values
+    filtered_data.loc[:, 'Species'] = filtered_data['Species'].astype(str).fillna('')
+    #filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
+    filtered_data.loc[:, 'Resistance'] = filtered_data['Resistance'].astype(str).fillna('')
 
-    # Generate subgroup criteria based on the filtered data
-    if not filtered_data.empty:
-        for column in ['Country', 'Source', 'Antibiotics']:
-            if len(filtered_data[column].unique()) == 1:
-                final_criteria[column] = filtered_data[column].iloc[0]
+    # Display buttons in two columns
+    col1, col2 = st.columns(2)
 
-        top_species = filtered_data['Species'].value_counts().head(3).index.tolist()
-        species_resistance = filtered_data.groupby('Species')['Resistance'].mean().loc[top_species]
+
+
+
+
+
     
-        if final_criteria:
-            criteria_str = ', '.join([f'{key}: {value}' for key, value in final_criteria.items()])
-        else:
-            criteria_str = "Entire dataset filtered by 'Country', 'Source', 'Antibiotics'"
-
-        st.write(f"Top 3 most common bacterial species and their resistance levels (Criteria: {criteria_str}):")
     
-        for species, resistance in species_resistance.items():
-            resistance_percentage = resistance * 100
-            st.write(f"**{species}**: Resistance Level: **{resistance_percentage:.2f}%**")
-    else:
-        st.write("No data available even after relaxing the criteria.")
-
-    # Prediction code
-    susceptibility = ''
-    if st.button('Show AST Triage Result'):
-        # Create a DataFrame with the input data for the model
-        example_data = pd.DataFrame({
-            'Age.Group': [age],
-            'Country': [country],
-            'Speciality': [speciality], 
-            'Source': [source],
-            'Antibiotics': [antibiotic]
-        })
-
-        # Encode the input data (assuming the model requires label encoding)
-        for column in example_data.columns:
-            le = LabelEncoder()
-            example_data[column] = le.fit_transform(example_data[column].astype(str))
-
-        # Ensure the DataFrame aligns with the trained model
-        encoded_values = pd.get_dummies(example_data)
-
-        # Align encoded DataFrame with the model's expected feature names
-        encoded_values = encoded_values.reindex(columns=model.feature_names_in_, fill_value=0)
-
-        # Predict with the model
-        prediction = model.predict_proba(encoded_values)[0]
-
-        # Interpret the prediction
-        susceptibility_percentage = prediction[1] * 100  # Probability of resistance
-        if susceptibility_percentage >= 50:
-            susceptibility = f'Strong AST recommendation due to the high probability of resistance in similar cases from surveillance datasets.'
+    
+    # Function to format colors based on susceptibility percentage
+    def color_format(val):
+        if isinstance(val, str) and val.endswith('%'):
+            percentage = float(val.rstrip('%'))
+            if percentage > 75:
+                return 'background-color: green'
+            elif 50 <= percentage <= 75:
+                return 'background-color: orange'
+            else:
+                return 'background-color: red'
+        return ''
+    
+    # Function to calculate and display antibiogram
+    def display_antibiogram(filtered_data, message):
+        if not filtered_data.empty:
+            st.write(message)
+            filtered_data['Species'] = filtered_data['Species'].astype(str).fillna('')
+            filtered_data['Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
+            filtered_data['Resistance'] = pd.to_numeric(filtered_data['Resistance'], errors='coerce').fillna(0).astype(int)
+    
+            resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
+            if 0 in resistance_summary.columns:
+                resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
+                resistance_summary['% Susceptibility'] = (resistance_summary[0] / resistance_summary['Total Count']) * 100
+                resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].round(1).apply(lambda x: f"{x:.1f}%")
+            else:
+                st.write("No susceptible data available to calculate '% Susceptibility'.")
+    
+            pivoted_susceptibility = resistance_summary.pivot_table(index='Species', columns='Antibiotics', values='% Susceptibility', aggfunc='first')
+            all_antibiotics = combined_data['Antibiotics'].unique()
+            pivoted_susceptibility = pivoted_susceptibility.reindex(columns=all_antibiotics, fill_value='N/A')
+            pivoted_susceptibility.insert(0, 'Total Count', resistance_summary.groupby('Species')['Total Count'].first())
+    
+            styled_summary = pivoted_susceptibility.style.applymap(color_format, subset=pd.IndexSlice[:, pivoted_susceptibility.columns[1:]])
+            st.write("Detailed Antibiogram")
+            st.dataframe(styled_summary)
         else:
-            susceptibility = f'Moderate AST recommendation due to the lower probability of resistance in similar cases from surveillance datasets.'
-
-        # Display the result
-        st.write('Prediction:', susceptibility)
-        st.write("""
-        Disclaimer: The predictive AI model provided is intended for informational purposes only.
-        """)
+            st.write(f"No data found. {message}")
 
 
 
+    with col1:
+        if st.button('Customised Triage Antibiogram'):
+            if filtered_data.empty:
+                bordering_countries = world_bank_data.loc[world_bank_data['Country'] == country, 'Bordering Countries'].values
+                if bordering_countries.size > 0 and isinstance(bordering_countries[0], str):
+                    bordering_countries_list = bordering_countries[0].split(', ')
+                    filtered_data = combined_data.loc[(combined_data['Country'].isin(bordering_countries_list)) & (combined_data['Source'] == source)]
+                    message = f"No data for {country}and {source} for triage antibiogram. Using bordering countries: {', '.join(bordering_countries_list)}"
+                else:
+                    filtered_data = combined_data.loc[(combined_data['Source'] == source)]
+                    message = f"No data for {country} and {source} or its borders. Using the full dataset to make custom triage antibiogram."
+            else:
+                message = f"Triage antibiogram made using filtering criteria of: {country} and {source}"
+    
+            display_antibiogram(filtered_data, message)
+
+    
+
+
+
+    
+    # Button to show AI triaging result
+    with col2:
+        if st.button('AI Triaging Result'):
+            susceptibility = ''
+            if not filtered_data.empty:
+                # Create a DataFrame with the input data for the model
+                example_data = pd.DataFrame({
+                    'Age.Group': [age],
+                    'Country': [country],
+                    'Speciality': [speciality], 
+                    'Source': [source],
+                    'Antibiotics': [antibiotic]
+                })
+
+                # Encode the input data (assuming the model requires label encoding)
+                for column in example_data.columns:
+                    le = LabelEncoder()
+                    example_data[column] = le.fit_transform(example_data[column].astype(str))
+
+                # Ensure the DataFrame aligns with the trained model
+                encoded_values = pd.get_dummies(example_data)
+
+                # Align encoded DataFrame with the model's expected feature names
+                encoded_values = encoded_values.reindex(columns=model.feature_names_in_, fill_value=0)
+
+                # Predict with the model
+                prediction = model.predict_proba(encoded_values)[0]
+
+                # Interpret the prediction
+                susceptibility_percentage = prediction[1] * 100  # Probability of resistance
+                if susceptibility_percentage >= 50:
+                    susceptibility = f'Strong AST recommendation due to the high probability of resistance in similar cases from surveillance datasets.'
+                else:
+                    susceptibility = f'Moderate AST recommendation due to the lower probability of resistance in similar cases from surveillance datasets.'
+
+                # Display the result
+                st.write('Prediction:', susceptibility)
+                st.write("""
+                Disclaimer: The predictive AI model provided is intended for informational purposes only.
+                """)
 
 
 
@@ -204,10 +303,11 @@ with tab1:
 
 
 
+# Create the second tab
+elif selected_tab == "Performance of Decision Trees":
+    st.title("Performance of the Decision Tree Model")
+    st.write('This is a tool for policy makers to test the performance metrics of Decision Trees on their own data.')
 
-with tab2:
-    st.title("Performance of the Decision Tree model")
-    st.write('This is a tool for policy makers to test the performance metrics of Decision trees on their own data.')
     # File uploader for CSV
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     
@@ -218,31 +318,36 @@ with tab2:
     else:
         # Use the default dataset
         st.write("No file uploaded. Using default dataset from Pfizer(ATLAS) and Venatorx(GEARS) surveillance for 2022.")
+        # Assume the combined_data is loaded here (replace with your actual dataset if necessary)
+    
+    if combined_data is not None:
+        # Allow the user to select the source from a dropdown menu
+        selected_source = st.selectbox("Select the source:", combined_data['Source'].unique())
+        
+        # Filter data based on the selected source
+        filtered_data = combined_data[combined_data['Source'] == selected_source]
 
-    def analyze_resistance(data, filter_column='Source'):
-        results = {}
-        filter_values = data[filter_column].unique()
+        def analyze_resistance(data):
+            results = {}
 
-        def calculate_additional_metrics(youden_index, psi, accuracy):
-            nnd = 1 / youden_index if youden_index != 0 else np.inf
-            nnp = 1 / psi if psi != 0 else np.inf
-            nnm = 1 / (1 - accuracy) if accuracy != 1 else np.inf
-            return nnd, nnp, nnm
+            def calculate_additional_metrics(youden_index, psi, accuracy):
+                nnd = 1 / youden_index if youden_index != 0 else np.inf
+                nnp = 1 / psi if psi != 0 else np.inf
+                nnm = 1 / (1 - accuracy) if accuracy != 1 else np.inf
+                return nnd, nnp, nnm
 
-        def calculate_metrics(conf_matrix):
-            tn, fp, fn, tp = conf_matrix.ravel()
-            sensitivity = tp / (tp + fn) if (tp + fn) > 0 else np.nan
-            specificity = tn / (tn + fp) if (tn + fp) > 0 else np.nan
-            ppv = tp / (tp + fp) if (tp + fp) > 0 else np.nan
-            npv = tn / (tn + fn) if (tn + fn) > 0 else np.nan
-            youden_index = sensitivity + specificity - 1
-            psi = ppv + npv - 1
-            return sensitivity, specificity, ppv, npv, youden_index, psi
+            def calculate_metrics(conf_matrix):
+                tn, fp, fn, tp = conf_matrix.ravel()
+                sensitivity = tp / (tp + fn) if (tp + fn) > 0 else np.nan
+                specificity = tn / (tn + fp) if (tn + fp) > 0 else np.nan
+                ppv = tp / (tp + fp) if (tp + fp) > 0 else np.nan
+                npv = tn / (tn + fn) if (tn + fn) > 0 else np.nan
+                youden_index = sensitivity + specificity - 1
+                psi = ppv + npv - 1
+                return sensitivity, specificity, ppv, npv, youden_index, psi
 
-        for value in filter_values:
-            filtered_data = data[data[filter_column] == value]
-            X = filtered_data.drop(columns=['Resistance', filter_column])
-            y = filtered_data['Resistance']
+            X = data.drop(columns=['Resistance', 'Source'])
+            y = data['Resistance']
             X = X.apply(LabelEncoder().fit_transform)
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
             clf = RandomForestClassifier(random_state=42)
@@ -258,7 +363,7 @@ with tab2:
                 auc = roc_auc_score(y_test, y_pred_proba) if len(np.unique(y_test)) > 1 else np.nan
 
             nnd, nnp, nnm = calculate_additional_metrics(youden_index, psi, accuracy)
-            results[value] = {
+            results[selected_source] = {
                 'Confusion Matrix': conf_matrix,
                 'Accuracy': accuracy,
                 'AUC': auc,
@@ -273,16 +378,15 @@ with tab2:
                 'NNM (Number Needed to Misdiagnose)': nnm
             }
 
-        return results, filter_column
+            return results
 
-    if combined_data is not None:
-        st.write("Performing resistance analysis...")
-        results, filter_column = analyze_resistance(combined_data, 'Source')
-        st.write(f"Analysis results based on {filter_column}:")
+        if not filtered_data.empty:
+            st.write(f"Performing resistance analysis for source: {selected_source}")
+            results = analyze_resistance(filtered_data)
+            metrics = results[selected_source]
 
-        for source, metrics in results.items():
             output = (
-                f"For the source **{source}**, the analysis yielded an accuracy of **{metrics['Accuracy']:.2f}** "
+                f"For the source **{selected_source}**, the analysis yielded an accuracy of **{metrics['Accuracy']:.2f}** "
                 f"and an AUC of **{metrics['AUC']:.2f}**. The sensitivity (recall) was **{metrics['Sensitivity (Recall)']:.2f}**, "
                 f"while the specificity reached **{metrics['Specificity']:.2f}**. The positive predictive value (PPV or precision) "
                 f"was **{metrics['PPV (Precision)']:.2f}**, and the negative predictive value (NPV) was **{metrics['NPV']:.2f}**. "
@@ -300,7 +404,7 @@ with tab2:
                 r=[metrics['Sensitivity (Recall)'], metrics['Specificity'], metrics['PPV (Precision)'], metrics['NPV']],
                 theta=['Sensitivity', 'Specificity', 'PPV', 'NPV'],
                 fill='toself',
-                name=source
+                name=selected_source
             ))
 
             fig.update_layout(
@@ -313,3 +417,5 @@ with tab2:
             )
 
             st.plotly_chart(fig)
+        else:
+            st.write(f"No data available for the selected source: {selected_source}")
