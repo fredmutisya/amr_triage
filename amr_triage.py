@@ -134,6 +134,12 @@ with tab1:
                 if not filtered_data.empty:
                     st.write(f"Data found using region countries: {region_countries}")
 
+        # Ensure all necessary columns are strings and handle NaN values
+    filtered_data['Species'] = filtered_data['Species'].fillna('Unknown').astype(str)
+    filtered_data['Antibiotics'] = filtered_data['Antibiotics'].fillna('Unknown').astype(str)
+    filtered_data['Resistance'] = filtered_data['Resistance'].fillna('Unknown').astype(str)
+
+    
     # Track the final criteria used
     final_criteria = {}
 
