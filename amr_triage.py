@@ -85,7 +85,7 @@ with tab1:
     recent_antibiotics = st.selectbox('Has the patient taken antibiotics in the previous 3 months?', ['Yes', 'No'])
     suspected_infection = st.text_input('What type of infection do you suspect the patient has?')
     source = st.selectbox('What type of sample is to be collected?', source_sample)
-    antibiotic = st.selectbox('Which antibiotics were administered before specimen collection?', antibiotics)
+    antibiotic = st.selectbox('Which antibiotic are you thinking of prescribing today?', antibiotics)
 
     # Filter the combined dataset based on the selected criteria
     filtered_data = combined_data[
