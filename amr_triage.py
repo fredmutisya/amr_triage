@@ -151,104 +151,63 @@ with tab1:
     
 
 
+# Function to format colors based on susceptibility percentage
+def color_format(val):
+    if isinstance(val, str) and val.endswith('%'):
+        percentage = float(val.rstrip('%'))
+        if percentage > 75:
+            return 'background-color: green'
+        elif 50 <= percentage <= 75:
+            return 'background-color: orange'
+        else:
+            return 'background-color: red'
+    return ''
+
+# Function to calculate and display antibiogram
+def display_antibiogram(filtered_data, message):
+    if not filtered_data.empty:
+        st.write(message)
+        filtered_data['Species'] = filtered_data['Species'].astype(str).fillna('')
+        filtered_data['Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
+        filtered_data['Resistance'] = pd.to_numeric(filtered_data['Resistance'], errors='coerce').fillna(0).astype(int)
+
+        resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
+        if 0 in resistance_summary.columns:
+            resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
+            resistance_summary['% Susceptibility'] = (resistance_summary[0] / resistance_summary['Total Count']) * 100
+            resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].round(1).apply(lambda x: f"{x:.1f}%")
+        else:
+            st.write("No susceptible data available to calculate '% Susceptibility'.")
+
+        pivoted_susceptibility = resistance_summary.pivot_table(index='Species', columns='Antibiotics', values='% Susceptibility', aggfunc='first')
+        all_antibiotics = combined_data['Antibiotics'].unique()
+        pivoted_susceptibility = pivoted_susceptibility.reindex(columns=all_antibiotics, fill_value='N/A')
+        pivoted_susceptibility.insert(0, 'Total Count', resistance_summary.groupby('Species')['Total Count'].first())
+
+        styled_summary = pivoted_susceptibility.style.applymap(color_format, subset=pd.IndexSlice[:, pivoted_susceptibility.columns[1:]])
+        st.write("Detailed Antibiogram")
+        st.dataframe(styled_summary)
+    else:
+        st.write(f"No data found. {message}")
+
+
+
     with col1:
         if st.button('Antibiogram'):
-            if not filtered_data.empty:
-                st.write(f"Filtering criteria: Country = {country}, Source = {source}")
-                
-                # Ensure that 'Species', 'Antibiotics', and 'Resistance' columns are correctly typed
-                filtered_data.loc[:, 'Species'] = filtered_data['Species'].astype(str).fillna('')
-                filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
-                filtered_data.loc[:, 'Resistance'] = pd.to_numeric(filtered_data['Resistance'], errors='coerce').fillna(0).astype(int)
-    
-                # Calculate resistance counts by Species and Antibiotic
-                resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
-    
-                # Check if the '0' (Susceptible) column exists
-                if 0 in resistance_summary.columns:
-                    resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
-                    resistance_summary['% Susceptibility'] = (resistance_summary[0] / resistance_summary['Total Count']) * 100
-                    resistance_summary = resistance_summary.round({'% Susceptibility': 1})
-                    
-                    # Format the percentage with a percentage sign
-                    resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].apply(lambda x: f"{x:.1f}%")
-                else:
-                    st.write("No susceptible data available to calculate '% Susceptibility'.")
-    
-                # Reshape the DataFrame so that each antibiotic has its own column
-                pivoted_susceptibility = resistance_summary.pivot_table(index='Species', columns='Antibiotics', values='% Susceptibility', aggfunc='first')
-    
-                # Ensure all antibiotics appear, even those not in the filtered data
-                all_antibiotics = combined_data['Antibiotics'].unique()
-                pivoted_susceptibility = pivoted_susceptibility.reindex(columns=all_antibiotics, fill_value='N/A')
-    
-                # Get the total count of each species (across all antibiotics) and insert it as the first column
-                total_count = resistance_summary.groupby('Species')['Total Count'].first()
-                pivoted_susceptibility.insert(0, 'Total Count', total_count)
-    
-                # Function to apply color formatting
-                def color_format(val):
-                    if isinstance(val, str) and val.endswith('%'):
-                        percentage = float(val.rstrip('%'))
-                        if percentage > 75:
-                            color = 'green'
-                        elif 50 <= percentage <= 75:
-                            color = 'orange'
-                        else:
-                            color = 'red'
-                        return f'background-color: {color}'
-                    return ''
-    
-                # Apply the color formatting to the dataframe
-                styled_summary = pivoted_susceptibility.style.applymap(color_format, subset=pd.IndexSlice[:, pivoted_susceptibility.columns[1:]])
-    
-                st.write("Detailed Antibiogram")
-                st.dataframe(styled_summary)
-            else:
-                # If no data found, expand the selection to bordering countries
+            if filtered_data.empty:
                 bordering_countries = world_bank_data.loc[world_bank_data['Country'] == country, 'Bordering Countries'].values
                 if bordering_countries.size > 0 and isinstance(bordering_countries[0], str):
                     bordering_countries_list = bordering_countries[0].split(', ')
-                    filtered_data = combined_data.loc[
-                        (combined_data['Country'].isin(bordering_countries_list)) &
-                        (combined_data['Source'] == source)
-                    ]
-                    
-                    if not filtered_data.empty:
-                        st.write(f"No data for {country}. Expanded filtering criteria: Bordering Countries = {bordering_countries_list}, Source = {source}")
-                        
-                        # Re-run the antibiogram code with expanded selection
-                        filtered_data.loc[:, 'Species'] = filtered_data['Species'].astype(str).fillna('')
-                        filtered_data.loc[:, 'Antibiotics'] = filtered_data['Antibiotics'].astype(str).fillna('')
-                        filtered_data.loc[:, 'Resistance'] = pd.to_numeric(filtered_data['Resistance'], errors='coerce').fillna(0).astype(int)
-    
-                        resistance_summary = filtered_data.groupby(['Species', 'Antibiotics', 'Resistance']).size().unstack(fill_value=0)
-    
-                        if 0 in resistance_summary.columns:
-                            resistance_summary['Total Count'] = resistance_summary.sum(axis=1)
-                            resistance_summary['% Susceptibility'] = (resistance_summary[0] / resistance_summary['Total Count']) * 100
-                            resistance_summary = resistance_summary.round({'% Susceptibility': 1})
-                            resistance_summary['% Susceptibility'] = resistance_summary['% Susceptibility'].apply(lambda x: f"{x:.1f}%")
-                        else:
-                            st.write("No susceptible data available to calculate '% Susceptibility'.")
-    
-                        pivoted_susceptibility = resistance_summary.pivot_table(index='Species', columns='Antibiotics', values='% Susceptibility', aggfunc='first')
-                        pivoted_susceptibility = pivoted_susceptibility.reindex(columns=all_antibiotics, fill_value='N/A')
-                        total_count = resistance_summary.groupby('Species')['Total Count'].first()
-                        pivoted_susceptibility.insert(0, 'Total Count', total_count)
-    
-                        styled_summary = pivoted_susceptibility.style.applymap(color_format, subset=pd.IndexSlice[:, pivoted_susceptibility.columns[1:]])
-    
-                        st.write("Detailed Antibiogram")
-                        st.dataframe(styled_summary)
-                    else:
-                        st.write(f"No data available for {country} or its bordering countries.")
+                    filtered_data = combined_data.loc[(combined_data['Country'].isin(bordering_countries_list)) & (combined_data['Source'] == source)]
+                    message = f"No data for {country}. Using bordering countries: {', '.join(bordering_countries_list)}"
                 else:
-                    st.write(f"No bordering countries data available for {country}.")
-
+                    filtered_data = combined_data.loc[(combined_data['Source'] == source)]
+                    message = f"No data for {country} or its borders. Using the full dataset."
+            else:
+                message = f"Filtering criteria met for: {country}"
     
+            display_antibiogram(filtered_data, message)
 
-    
     
 
 
