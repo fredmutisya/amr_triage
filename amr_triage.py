@@ -14,6 +14,25 @@ from sklearn.metrics import confusion_matrix, accuracy_score, roc_auc_score
 from sklearn.exceptions import UndefinedMetricWarning
 import warnings
 
+# Set page configuration
+st.set_page_config(
+    page_title="AST Prioritization Tool",
+    page_icon="🧬",
+    layout="wide",
+    initial_sidebar_state="expanded"  # Sidebar expanded by default
+)
+
+# Load the Lottie animation
+with open("doctor.json") as f:
+    lottie_animation = json.load(f)
+
+# Display the Lottie animation in the sidebar
+st.sidebar.title("Instructions")
+st.sidebar.info("""
+Input the patient details into the AST triage tool to assess the urgency of antimicrobial resistance testing.
+""")
+st_lottie(lottie_animation, height=300)
+
 # Load saved model
 model = pickle.load(open("decision_tree_model.pkl", 'rb'))
 
