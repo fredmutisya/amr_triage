@@ -97,7 +97,7 @@ Once the notebook interface opens, navigate to `Number needed to Predict AMR.ipy
 To execute the triage script, run the following command:
 
 ```bash
-python amr_triage.py --input <input_data.csv> --output <output_predictions.csv>
+streamlit run amr_triage.py 
 ```
 
 Replace `<input_data.csv>` with the path to your dataset and `<output_predictions.csv>` with the desired location for the output.
@@ -109,13 +109,6 @@ Replace `<input_data.csv>` with the path to your dataset and `<output_prediction
 
 ---
 
-## Assumptions and Limitations
-
-### Assumptions:
-1. **Binomial Distribution**: The predictive models assume a binomial distribution of the outcome (AMR vs. Non-AMR).
-2. **Normal Approximation**: For large datasets, the models rely on normal approximation to calculate confidence intervals and performance metrics.
-3. **Independence of Observations**: Each observation in the dataset is considered independent.
-4. **Significance Level**: The models use a standard \( \alpha = 0.05 \) for hypothesis testing.
 
 ### Limitations:
 1. **Small Sample Sizes**: For small datasets, model performance might not be accurate, and normal approximation may not hold.
