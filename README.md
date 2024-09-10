@@ -146,7 +146,7 @@ Contributions are welcome! Please follow the steps below to contribute:
 Comparing screening performance of model across sample sources
 
 <img width="727" alt="image" src="https://github.com/user-attachments/assets/7b57b113-03f5-4dce-9a6c-16774313ebf8">
-
+NND=Number needed to diagnose, NNM=Number needed to Misdiagnose, NNP=Number need to predict
 ---
 
 ## screenshots of tool
