@@ -22,7 +22,7 @@ The repository includes:
 - [Key Concepts](#key-concepts)
 - [Contributing](#contributing)
 - [License](#license)
-
+- [source_performance_example] (#source-performance)
 ---
 
 ## Installation
@@ -140,6 +140,11 @@ Contributions are welcome! Please follow the steps below to contribute:
 6. Open a pull request.
 
 ---
+
+## source-performance
+
+Comparing screening performance of model across sample sources
+<img width="727" alt="image" src="https://github.com/user-attachments/assets/7b57b113-03f5-4dce-9a6c-16774313ebf8">
 
 ---
 
