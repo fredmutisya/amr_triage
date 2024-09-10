@@ -22,7 +22,7 @@ The repository includes:
 - [Key Concepts](#key-concepts)
 - [Contributing](#contributing)
 - [License](#license)
-- [source_performance_example] (#source-performance)
+- [source-performance_example] (#source-performance)
 ---
 
 ## Installation
@@ -144,9 +144,17 @@ Contributions are welcome! Please follow the steps below to contribute:
 ## source-performance
 
 Comparing screening performance of model across sample sources
+
 <img width="727" alt="image" src="https://github.com/user-attachments/assets/7b57b113-03f5-4dce-9a6c-16774313ebf8">
 
 ---
+
+## screenshots of tool
+
+<div align="center">
+	<img width="50%" alt="image" src="https://github.com/user-attachments/assets/edee1ff9-a55f-4767-9be9-59fd557545b1">
+<img width="50%" alt="image" src="https://github.com/user-attachments/assets/f6a8f220-22f3-44ba-bb6f-42b9d363bce2">
+</div>
 
 Feel free to contact us with any questions or suggestions!
 
